@@ -1,0 +1,15 @@
+type User {
+  email: String!
+}
+
+# type content {
+#   type: String!
+#   title: String!
+#   link: String!
+#   thumbnail: String!
+#   pk: String!
+# }
+
+type Mutation {
+  signUp(email:String!,password:String!): User! # @aws_auth(cognito_groups:["Admin"])
+}
