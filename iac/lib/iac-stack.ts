@@ -55,6 +55,9 @@ export class IacStack extends cdk.Stack {
           mutable: true,
         },
       },
+      customAttributes: {
+        createdAt: new cdk.aws_cognito.DateTimeAttribute()
+      },
       passwordPolicy: {
         minLength: parseInt(process.env.user_pool_password_min_length!),
         requireLowercase: true,
@@ -68,6 +71,7 @@ export class IacStack extends cdk.Stack {
 
     const clientReadAttributes = new cdk.aws_cognito.ClientAttributes()
     .withStandardAttributes(standardCognitoAttributes)
+    .withCustomAttributes('createdAt')
 
     const clientWriteAttributes = new cdk.aws_cognito.ClientAttributes()
     .withStandardAttributes({
