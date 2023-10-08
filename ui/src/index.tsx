@@ -1,15 +1,34 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.scss';
-import App from './pages/landing-page/landing-page';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
+import LandingPage from './pages/landing-page/landing-page';
+import SignIn from './pages/sign-in/sign-in';
+import { Amplify, Auth } from 'aws-amplify';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
-);
+)
+
+Amplify.configure({
+  Auth: {
+    region: process.env.REACT_APP_aws_region!,
+    userPoolId: process.env.REACT_APP_user_pool_id!,
+    userPoolWebClientId: process.env.REACT_APP_user_pool_web_client_id!
+  }
+})
+
+Auth.configure()
+
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/sign-in" element={<SignIn />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>
 );
 

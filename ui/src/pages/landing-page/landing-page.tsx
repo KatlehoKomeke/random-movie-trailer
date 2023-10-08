@@ -1,11 +1,13 @@
-import React from 'react';
-import './landing-page.scss';
+import React from 'react'
+import './landing-page.scss'
+import NavBar from '../../components/nav-bar/nav-bar';
 
-function App() {
+function LandingPage() {
   return (
-    <div className="App">
+    <div className="landing-page-container">
+      <NavBar showLogo={true} showSignIn={true}/>
     </div>
   );
 }
 
-export default App;
+export default LandingPage;

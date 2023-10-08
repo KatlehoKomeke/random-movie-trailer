@@ -1,0 +1,35 @@
+.nav-bar-conainer{
+    width: 100vw;
+    height: 15vmax;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    place-items: center;
+    .logo{
+        max-height: 6vmax;
+        cursor: pointer;
+        
+    }
+    .backBtn{
+        max-height: 5vmax;
+        cursor: pointer;
+    }
+    .sign-in_btn{
+        background-color: rgba(255,255,255,0.125);
+        color: rgba(255,255,255,0.8);
+        font-size: 3vmax;
+        padding: 1vmax;
+        border-radius: 3vmax;
+        cursor:pointer;
+        transition: all 1.5s;
+    }
+    .sign-in_btn:hover{
+        background-color: rgba(255,255,255,0.3);
+        color: rgba(255,255,255,1);
+    }
+}
+
+@media screen and (orientation: landscape) {
+    .nav-bar-conainer{
+        height: 15vmax;
+    }
+}
