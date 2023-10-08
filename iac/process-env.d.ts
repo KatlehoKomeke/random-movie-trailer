@@ -23,6 +23,13 @@ declare global {
 
             user_table: string;
             user_table_partition_key: string;
+
+            s3_bucket: string;
+            website_entrypoint: string;
+            frontend_path: string;
+
+            s3_deployment:string;
+            cloudfront_distribution:string;
         }
     }
 }

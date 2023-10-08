@@ -3,7 +3,6 @@ import { Construct } from 'constructs'
 import * as dotenv from 'dotenv'
 import { standardCognitoAttributes } from '../types/cognitoClientAttributes'
 import { nodeModules } from './../../api/lambdas/signUp'
-import * as path from 'path'
 
 // The project is not suppplied with 
 // a .env as that is bad practice. 
@@ -44,16 +43,6 @@ export class IacStack extends cdk.Stack {
       },
       autoVerify: {
         email: true,
-      },
-      standardAttributes: {
-        givenName: {
-          required: true,
-          mutable: true,
-        },
-        familyName: {
-          required: true,
-          mutable: true,
-        },
       },
       customAttributes: {
         createdAt: new cdk.aws_cognito.DateTimeAttribute()
@@ -132,6 +121,7 @@ export class IacStack extends cdk.Stack {
       }
     })
 
+    // 
     const userTable = new cdk.aws_dynamodb.Table(this, process.env.user_table!, {
       billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
       partitionKey: {
@@ -147,5 +137,27 @@ export class IacStack extends cdk.Stack {
     // Create an environment variable that we will use in the function code
     signUpLambda.addEnvironment(process.env.user_table!, userTable.tableName)
 
+    const cloudfrontBucket = new cdk.aws_s3.Bucket(this, process.env.s3_bucket!, {
+      encryption: cdk.aws_s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      versioned: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      websiteIndexDocument: process.env.website_entrypoint,
+      // S3 bucket hack for rendering 404s for SPAs
+      // as S3 does not support SPAs properly
+      websiteErrorDocument: process.env.website_entrypoint,
+      publicReadAccess: true
+    })
+    
+    new cdk.aws_s3_deployment.BucketDeployment(this, process.env.s3_deployment!, {
+      sources: [cdk.aws_s3_deployment.Source.asset(process.env.frontend_path!)],
+      destinationBucket: cloudfrontBucket
+    })
+    
+    new cdk.aws_cloudfront.Distribution(this, process.env.cloudfront_distribution!, {
+      defaultBehavior: { 
+        origin: new cdk.aws_cloudfront_origins.S3Origin(cloudfrontBucket)
+      }
+    })
   }
 }
