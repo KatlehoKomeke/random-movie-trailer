@@ -7,6 +7,9 @@ declare global {
         interface ProcessEnv {
             [key: string]: string | undefined;
             user_table: string;
+            tmdb_api_key: string;
+            tmbd_get_content_by_id_url: string;
+            tmbd_get_content_by_id_query_params: string;
         }
     }
 }

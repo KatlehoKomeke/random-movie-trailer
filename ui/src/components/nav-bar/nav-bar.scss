@@ -1,4 +1,6 @@
 .nav-bar-conainer{
+    position: absolute;
+    top: 0;
     width: 100vw;
     height: 15vmax;
     display: grid;
@@ -25,11 +27,5 @@
     .sign-in_btn:hover{
         background-color: rgba(255,255,255,0.3);
         color: rgba(255,255,255,1);
-    }
-}
-
-@media screen and (orientation: landscape) {
-    .nav-bar-conainer{
-        height: 15vmax;
     }
 }

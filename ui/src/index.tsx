@@ -6,6 +6,9 @@ import reportWebVitals from './reportWebVitals';
 import LandingPage from './pages/landing-page/landing-page';
 import SignIn from './pages/sign-in/sign-in';
 import { Amplify, Auth } from 'aws-amplify';
+import Content from './pages/content/content';
+import { URL_Redirect } from './types/types';
+import Menu from './pages/menu/menu';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -25,8 +28,10 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/sign-in" element={<SignIn />} />
+        <Route path={URL_Redirect.Home} element={<LandingPage />} />
+        <Route path={URL_Redirect.SignIn} element={<SignIn />} />
+        <Route path={URL_Redirect.Content} element={<Content />} />
+        <Route path={URL_Redirect.Menu} element={<Menu />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

@@ -8,3 +8,8 @@ export const standardCognitoAttributes:{
     emailVerified: true,
     lastUpdateTime: true
 };
+
+export enum graphqlQueryType {
+    Mutation = "Mutation",
+    Query = "Query"
+}

@@ -1,2 +1,2 @@
 *.js
-/lambdas/*d.ts
+/lambdas/*.d.ts

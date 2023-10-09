@@ -1,8 +1,9 @@
 import * as cdk from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import * as dotenv from 'dotenv'
-import { standardCognitoAttributes } from '../types/cognitoClientAttributes'
-import { nodeModules } from './../../api/lambdas/signUp'
+import { graphqlQueryType, standardCognitoAttributes } from '../types/types'
+import { getContentById_nodeModules } from './../../api/lambdas/getContentById'
+import path = require('path')
 
 // The project is not suppplied with 
 // a .env as that is bad practice. 
@@ -81,77 +82,92 @@ export class IacStack extends cdk.Stack {
     })
 
     // Creates a graphql API using AppSync
-    // const api_graphql = new cdk.aws_appsync.GraphqlApi(this, process.env.api_graphql!, {
-    //   name: process.env.api_graphql!,
-    //   // The schema prop is deprecated and will be removed
-    //   // however the current documentation is not clear on
-    //   // how to migrate from this implementation, so I'm
-    //   // leaving it here for now.
-    //   // schema: cdk.aws_appsync.SchemaFile.fromAsset(process.env.api_graphql_schema_path!),
-    //   authorizationConfig: {
-    //     defaultAuthorization: {
-    //       authorizationType: cdk.aws_appsync.AuthorizationType.API_KEY,
-    //       apiKeyConfig: {
-    //         expires: cdk.Expiration.after(
-    //           cdk.Duration.days(
-    //             parseInt(process.env.api_key_expiration!)
-    //           )
-    //         )
-    //       }
-    //     },
-    //     additionalAuthorizationModes: [
-    //       {
-    //         authorizationType: cdk.aws_appsync.AuthorizationType.USER_POOL,
-    //         userPoolConfig: {
-    //           userPool: userPool
-    //         }
-    //       }
-    //     ]
-    //   },
-    //   xrayEnabled: true
-    // })
-
-    const signUpLambda = new cdk.aws_lambda_nodejs.NodejsFunction(this, process.env.signUp_lambda_id!, {
-      runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
-      entry: process.env.signUp_lambda_path!, // accepts .js, .jsx, .ts, .tsx and .mjs files
-      // handler: process.env.signUp_lambda, // defaults to 'handler'
-      memorySize: parseInt(process.env.lambda_size!), // size in MBs
-      bundling: {
-        nodeModules: nodeModules
+    const api_graphql = new cdk.aws_appsync.GraphqlApi(this, process.env.api_graphql!, {
+      name: process.env.api_graphql!,
+      // The schema prop is deprecated and will be removed
+      // however the current documentation is not clear on
+      // how to migrate from this implementation, so I'm
+      // leaving it here for now.
+      schema: cdk.aws_appsync.SchemaFile.fromAsset(process.env.api_graphql_schema_path!),
+      authorizationConfig: {
+        defaultAuthorization: {
+          authorizationType: cdk.aws_appsync.AuthorizationType.API_KEY,
+          apiKeyConfig: {
+            expires: cdk.Expiration.after(
+              cdk.Duration.days(
+                parseInt(process.env.api_key_expiration!)
+              )
+            )
+          }
+        },
+        additionalAuthorizationModes: [
+          {
+            authorizationType: cdk.aws_appsync.AuthorizationType.USER_POOL,
+            userPoolConfig: {
+              userPool: userPool
+            }
+          }
+        ]
       }
     })
 
-    // 
-    const userTable = new cdk.aws_dynamodb.Table(this, process.env.user_table!, {
+    const getContentByIdLambda = new cdk.aws_lambda_nodejs.NodejsFunction(this, process.env.get_content_by_id_lambda!, {
+      runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
+      entry: process.env.get_content_by_id_lambda_path!, // accepts .js, .jsx, .ts, .tsx and .mjs files
+      // handler: process.env.signUp_lambda, // defaults to 'handler'
+      memorySize: parseInt(process.env.lambda_size!), // size in MBs
+      bundling: {
+        nodeModules: getContentById_nodeModules
+      }
+    })
+
+    // Set the new Lambda function as a data source for the AppSync API
+    const getContentByIdLambdaDS = api_graphql.addLambdaDataSource(process.env.get_content_by_id_lambdaDS!, getContentByIdLambda);
+
+    getContentByIdLambdaDS.createResolver(process.env.get_content_by_id_resolver!,{
+      typeName: graphqlQueryType.Query,
+      fieldName: process.env.get_content_by_id!
+    })
+    
+    const userBehaviourTable = new cdk.aws_dynamodb.Table(this, process.env.user_behaviour_table!, {
       billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
       partitionKey: {
-        name: process.env.user_table_partition_key!,
+        name: process.env.user_behaviour_table_partition_key!,
         type: cdk.aws_dynamodb.AttributeType.STRING,
       },
       removalPolicy: cdk.RemovalPolicy.RETAIN
     })
 
     // enable the Lambda function to access the DynamoDB table (using IAM)
-    userTable.grantFullAccess(signUpLambda)
+    // userBehaviourTable.grantFullAccess(signUpLambda)
 
     // Create an environment variable that we will use in the function code
-    signUpLambda.addEnvironment(process.env.user_table!, userTable.tableName)
+    // signUpLambda.addEnvironment(process.env.user_table!, userBehaviourTable.tableName)
 
     const cloudfrontBucket = new cdk.aws_s3.Bucket(this, process.env.s3_bucket!, {
       encryption: cdk.aws_s3.BucketEncryption.S3_MANAGED,
       enforceSSL: true,
       versioned: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      websiteIndexDocument: process.env.website_entrypoint,
+      websiteIndexDocument: process.env.website_entrypoint!,
+      blockPublicAccess: {
+        blockPublicAcls: false,
+        blockPublicPolicy: false,
+        ignorePublicAcls: false,
+        restrictPublicBuckets: false
+      },
       // S3 bucket hack for rendering 404s for SPAs
       // as S3 does not support SPAs properly
-      websiteErrorDocument: process.env.website_entrypoint,
-      publicReadAccess: true
+      websiteErrorDocument: process.env.website_entrypoint!,
+      publicReadAccess: true,
+      objectOwnership: cdk.aws_s3.ObjectOwnership.OBJECT_WRITER,
+      autoDeleteObjects: true
     })
     
     new cdk.aws_s3_deployment.BucketDeployment(this, process.env.s3_deployment!, {
       sources: [cdk.aws_s3_deployment.Source.asset(process.env.frontend_path!)],
-      destinationBucket: cloudfrontBucket
+      destinationBucket: cloudfrontBucket,
+      contentLanguage: "en"
     })
     
     new cdk.aws_cloudfront.Distribution(this, process.env.cloudfront_distribution!, {

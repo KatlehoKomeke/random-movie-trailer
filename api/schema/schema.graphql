@@ -1,15 +1,8 @@
-type User {
-  email: String!
+type Content {
+  title: String!
+  link: String!
 }
 
-# type content {
-#   type: String!
-#   title: String!
-#   link: String!
-#   thumbnail: String!
-#   pk: String!
-# }
-
-type Mutation {
-  signUp(email:String!,password:String!): User! # @aws_auth(cognito_groups:["Admin"])
+type Query {
+  getContentById(id:String!): Content! # @aws_auth(cognito_groups:["User"]) # @function(name: "signup", region: "us-east-1")
 }

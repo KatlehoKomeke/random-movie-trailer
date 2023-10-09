@@ -1,0 +1,18 @@
+.content-display-container{
+    h2{
+        text-overflow: ellipsis;
+        width: 35vmax;
+    }
+}
+
+.content{
+    background-color: rgba(25, 25, 25, 0.2);
+    width: 35vmax;
+    height: 20vmax;
+    border-radius: 3vmax;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    box-shadow: rgba(13, 17, 17,0.7) 0vmax 1vmax 1vmax -1vmax;
+}
