@@ -6,9 +6,10 @@ declare global {
     namespace NodeJS {
         interface ProcessEnv {
             [key: string]: string | undefined;
-            aws_region: string;
-            user_pool_id: string;
-            user_pool_web_client_id: string;
+            REACT_APP_aws_region: string;
+            REACT_APP_user_pool_id: string;
+            REACT_APP_user_pool_web_client_id: string;
+            REACT_APP_appsync_api_key: string;
         }
     }
 }

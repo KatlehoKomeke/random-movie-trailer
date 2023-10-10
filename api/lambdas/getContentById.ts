@@ -1,32 +1,48 @@
-import { RequestInfo, RequestInit } from 'node-fetch';
+import axios from 'axios'
+import * as dotenv from 'dotenv'
 
-const fetch = (url: RequestInfo, init?: RequestInit) =>
-  import('node-fetch').then(({ default: fetch }) => fetch(url, init));
+// The project is not suppplied with 
+// a .env as that is bad practice. 
+// So please note that should you wish 
+// to run this, you would have to create 
+// one.
+dotenv.config()
 
-// Whenever a module is added or removed 
-// this const has to be updated as it
-// is used to specify how the lambda function
-// should be bundeled by esdbuilds in the iac-stack
-export const getContentById_nodeModules: string[] = ['node-fetch']
 
 async function getContentById(id: number): Promise<{title:string,link:string;}>{
 
-    const url = process.env.tmbd_get_content_by_id_url!+id+process.env.tmbd_get_content_by_id_query_params!
-    const options = {
-        method: 'GET',
-        headers: {
-            accept: 'application/json',
-            Authorization: 'Bearer '+process.env.tmdb_api_key
-        }
-    }
-    
-    fetch(url, options)
-    .then(res => res.json())
-    .then(json => console.log(json))
-    .catch(err => console.error('error:' + err))
+    axios.defaults.headers.common['accept'] = 'application/json'
+    axios.defaults.headers.common['Authorization'] ='Bearer '+process.env.tmdb_api_key!
 
-    const response = fetch(url, options).catch(err => {throw new Error(err)})
-    return {title:"", link:""}
+    let title = ''
+    // GET request for title
+    await axios({
+        method: 'get',
+        url: 'https://api.themoviedb.org/3/movie/'+id+'?language=en-US',
+        responseType: 'json'
+    })
+    .then(function (response) {
+        title = response.data.title
+    })
+    .catch((error)=>{
+        throw new Error("error @title getter: "+error.message)
+    })
+
+    let link = ''
+    // GET request for video link
+    await axios({
+        method: 'get',
+        url: process.env.tmbd_get_content_by_id_url!+id+process.env.tmbd_get_content_by_id_query_params!,
+        responseType: 'json'
+    })
+    .then(function (response) {
+        link = response.data.results.find((element)=> element.site === "YouTube")?.key
+    })
+    .catch((error)=>{
+        throw new Error("error @link getter: "+error.message)
+    })
+
+    return {title:title, link:link}
 }
 
 export default getContentById

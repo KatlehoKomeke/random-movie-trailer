@@ -1,8 +1,33 @@
+type Result {
+  adult: Boolean,
+  backdrop_path: String,
+  genre_ids: [Int],
+  id: Int,
+  original_language: String,
+  original_title: String,
+  overview: String,
+  popularity: Float,
+  poster_path: String,
+  release_date: String,
+  title: String,
+  video: Boolean,
+  vote_average: Float,
+  vote_count: Int
+}
+
+type Contents {
+  page: Int,
+  results: [Result],
+  total_pages: Int,
+  total_results: Int
+}
+
 type Content {
   title: String!
   link: String!
 }
 
 type Query {
-  getContentById(id:String!): Content! # @aws_auth(cognito_groups:["User"]) # @function(name: "signup", region: "us-east-1")
+  getContent(page:Int!): Contents!
+  getContentById(id:Int!): Content! # @aws_auth(cognito_groups:["User"]) # @function(name: "signup", region: "us-east-1")
 }

@@ -6,9 +6,6 @@ import { Auth } from 'aws-amplify';
 
 function SignIn() {
   const [swapSignInMode,setSwapSignInMode] = useState(false)
-  const [isVerifyStep, setIsVerifyStep] = useState(false)
-  const [verifyCode, setVerifyCode] = useState("")
-  const [userLoggedIn, setUserLoggedIn] = useState(false)
   const [userFormFields, setUserFormFields] = useState({
     email: "",
     password: "",
@@ -20,32 +17,18 @@ function SignIn() {
   
   async function signUp(){
     try {
-      const { user } = await Auth.signUp({
+      await Auth.signUp({
         username: userFormFields.email,
         password: userFormFields.password,
         attributes: {
           email: userFormFields.email
         }
       })
-      console.log("user: ",user)
-      setIsVerifyStep(true);
+      console.log("jwt: ", (await Auth.currentAuthenticatedUser())?.getAccessToken().getJwtToken())
+      // eslint-disable-next-line no-restricted-globals
+      location.href = '/'
     } catch (error) {
-      console.log('error signing up:', error)
-    }
-  }
-
-  async function handleVerifyCode() {
-    const email = userFormFields.email;
-    try {
-      const result = await Auth.confirmSignUp(email, verifyCode)
-      console.log("sign up verification result: ",result)
-      if(result === 'SUCCESS'){
-        setIsVerifyStep(false)
-      }else{
-        // show error modal
-      }
-    } catch (error) {
-      console.log('error at verify code step');
+      console.error('error signing up:', error)
     }
   }
 
@@ -77,31 +60,13 @@ function SignIn() {
       </div>
     )
   }
-
-  function renderCodeVerification(){
-    return(
-      <div className="VerifyCode">
-        <div className="">
-          <label>Verify Code</label>
-          <input type="text" value={verifyCode} onChange={(event) => setVerifyCode(event.target.value)} name="verifyCode" placeholder="code"/>
-        </div>
-        <button onClick={handleVerifyCode} className='SubmitVerifyCode'>Submit</button>
-      </div>
-    )
-  }
-
-  function renderSignInOrVerification(){
-    if(isVerifyStep){      
-      return renderCodeVerification() 
-    }
-    return renderSignInForm()
-  }
   
   async function login(){
     try {
-      const user = await Auth.signIn(userFormFields.email, userFormFields.password)
-      console.log("user: ", user)
-      setUserLoggedIn(true)
+      await Auth.signIn(userFormFields.email, userFormFields.password)
+      console.log("jwt: ", (await Auth.currentAuthenticatedUser())?.getAccessToken().getJwtToken())
+      // eslint-disable-next-line no-restricted-globals
+      location.href = '/'
     } catch (error) {
       console.log('error signing in', error)
     }
@@ -109,7 +74,7 @@ function SignIn() {
   return (
     <>
       <NavBar showBackBtn={true}/>
-      {renderSignInOrVerification()}
+      {renderSignInForm()}
     </>
   );
 }

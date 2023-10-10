@@ -8,7 +8,7 @@ declare global {
             [key: string]: string | undefined;
             aws_region: string;
 
-            user_pool:string;
+            user_pool: string;
             user_pool_client: string;
             user_pool_password_min_length: string;
 
@@ -16,20 +16,24 @@ declare global {
             api_graphql_schema_path: string;
             api_key_expiration: string;
 
-            signUp_lambda_id: string;
-            signUp_lambda_path: string;
-            login_lambda: string;
+            main_lambda_handler: string;
+            main_handler: string;
+            main_handler_dirname: string;
             lambda_size: string;
 
-            user_table: string;
-            user_table_partition_key: string;
+            main_lambdaDS: string;
+            get_content_by_id_resolver: string;
+            get_content_by_id: string;
+
+            user_behaviour_table: string;
+            user_behaviour_table_partition_key: string;
 
             s3_bucket: string;
             website_entrypoint: string;
             frontend_path: string;
 
-            s3_deployment:string;
-            cloudfront_distribution:string;
+            s3_deployment: string;
+            cloudfront_distribution: string;
         }
     }
 }

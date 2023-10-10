@@ -2,8 +2,6 @@ import * as cdk from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import * as dotenv from 'dotenv'
 import { graphqlQueryType, standardCognitoAttributes } from '../types/types'
-import { getContentById_nodeModules } from './../../api/lambdas/getContentById'
-import path = require('path')
 
 // The project is not suppplied with 
 // a .env as that is bad practice. 
@@ -53,10 +51,10 @@ export class IacStack extends cdk.Stack {
         requireLowercase: true,
         requireDigits: true,
         requireUppercase: true,
-        requireSymbols: true,
+        requireSymbols: true
       },
       accountRecovery: cdk.aws_cognito.AccountRecovery.EMAIL_ONLY,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
     })
 
     const clientReadAttributes = new cdk.aws_cognito.ClientAttributes()
@@ -111,20 +109,17 @@ export class IacStack extends cdk.Stack {
       }
     })
 
-    const getContentByIdLambda = new cdk.aws_lambda_nodejs.NodejsFunction(this, process.env.get_content_by_id_lambda!, {
+    const mainLambda = new cdk.aws_lambda.Function(this, process.env.main_lambda_handler!, {
       runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
-      entry: process.env.get_content_by_id_lambda_path!, // accepts .js, .jsx, .ts, .tsx and .mjs files
-      // handler: process.env.signUp_lambda, // defaults to 'handler'
-      memorySize: parseInt(process.env.lambda_size!), // size in MBs
-      bundling: {
-        nodeModules: getContentById_nodeModules
-      }
+      handler: process.env.main_handler!,
+      code: cdk.aws_lambda.Code.fromAsset(process.env.main_handler_dirname!),
+      memorySize: parseInt(process.env.lambda_size!)
     })
 
     // Set the new Lambda function as a data source for the AppSync API
-    const getContentByIdLambdaDS = api_graphql.addLambdaDataSource(process.env.get_content_by_id_lambdaDS!, getContentByIdLambda);
+    const mainLambdaDS = api_graphql.addLambdaDataSource(process.env.main_lambdaDS!, mainLambda);
 
-    getContentByIdLambdaDS.createResolver(process.env.get_content_by_id_resolver!,{
+    mainLambdaDS.createResolver(process.env.get_content_by_id_resolver!,{
       typeName: graphqlQueryType.Query,
       fieldName: process.env.get_content_by_id!
     })
