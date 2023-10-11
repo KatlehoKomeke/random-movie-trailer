@@ -2,6 +2,7 @@ import React from 'react'
 import './nav-bar.scss'
 import logo from './../../assets/Logo.svg'
 import backBtn from './../../assets/back_btn.svg'
+import menuBtn from './../../assets/menu_btn.svg'
 import { Link } from 'react-router-dom';
 import { NavBarOptions } from './../../types/types'
 
@@ -31,6 +32,14 @@ function NavBar(props: NavBarOptions) {
         ?
           <Link to="/">
             <img src={backBtn} className='backBtn' alt='back button'></img>
+          </Link>
+        : null
+      }
+      { 
+        props.showMenuBtn
+        ?
+          <Link to="/menu">
+            <img src={menuBtn} className='menuBtn' alt='menu button'></img>
           </Link>
         : null
       }

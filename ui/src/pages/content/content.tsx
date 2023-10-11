@@ -3,8 +3,9 @@ import './content.scss'
 import { useSearchParams } from 'react-router-dom'
 import NavBar from '../../components/nav-bar/nav-bar'
 import { getContentById } from '../../utils/content'
-import { checkIfLoggedIn } from '../../utils/auth'
-import { showLoader, tailspin } from '../../utils/loader'
+import { redirectIfNotLoggedIn } from '../../utils/auth'
+import { showLoader, tailspin } from '../../components/loader/loader'
+import { redirectToErrorPage } from '../../utils/error'
 
 function Content() {
     const [searchParams] = useSearchParams()
@@ -17,12 +18,12 @@ function Content() {
                 setContent(content)
             })
         } catch (error:any){
-            throw new Error("error: ",error?.message)
+            redirectToErrorPage(error)
         }
     }
 
     useEffect(() => {
-        checkIfLoggedIn()
+        redirectIfNotLoggedIn()
         .then(() => loadContent())
         .then(() => setLoading(false))
     },[])
@@ -41,12 +42,9 @@ function Content() {
         )
     }
     return (
-        showLoader(loading,tailspin(),renderMenu())
+        showLoader(loading,tailspin(),renderContent())
     )
 }
 
 export default Content;
-function renderMenu(): JSX.Element {
-    throw new Error('Function not implemented.')
-}
 

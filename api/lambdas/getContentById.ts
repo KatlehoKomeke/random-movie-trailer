@@ -1,5 +1,6 @@
 import axios from 'axios'
 import * as dotenv from 'dotenv'
+import { video_type } from '../types/types'
 
 // The project is not suppplied with 
 // a .env as that is bad practice. 
@@ -8,12 +9,10 @@ import * as dotenv from 'dotenv'
 // one.
 dotenv.config()
 
+axios.defaults.headers.common['accept'] = 'application/json'
+axios.defaults.headers.common['Authorization'] ='Bearer '+process.env.tmdb_api_key!
 
-async function getContentById(id: number): Promise<{title:string,link:string;}>{
-
-    axios.defaults.headers.common['accept'] = 'application/json'
-    axios.defaults.headers.common['Authorization'] ='Bearer '+process.env.tmdb_api_key!
-
+async function getTitle(id:number){
     let title = ''
     // GET request for title
     await axios({
@@ -28,6 +27,10 @@ async function getContentById(id: number): Promise<{title:string,link:string;}>{
         throw new Error("error @title getter: "+error.message)
     })
 
+    return title
+}
+
+async function getLink(id:number){
     let link = ''
     // GET request for video link
     await axios({
@@ -36,11 +39,19 @@ async function getContentById(id: number): Promise<{title:string,link:string;}>{
         responseType: 'json'
     })
     .then(function (response) {
-        link = response.data.results.find((element)=> element.site === "YouTube")?.key
+        link = response.data.results.find((element)=> element.site === video_type.YouTube)?.key
     })
     .catch((error)=>{
         throw new Error("error @link getter: "+error.message)
     })
+
+    return link
+}
+
+async function getContentById(id: number): Promise<{title:string,link:string;}>{
+
+    const title = await getTitle(id)
+    const link = await getLink(id)
 
     return {title:title, link:link}
 }

@@ -1,29 +1,39 @@
 import { Auth } from "aws-amplify";
 import { contentType, contentsType } from "../types/types";
+import { redirectToErrorPage } from "./error";
 
-export async function getContent(page: number):Promise<any>{
+export async function getContent(page: number):Promise<contentsType>{
     debugger
-    // const queryParam = '&page='+ page
-    const response = await fetch('https://jph3t55dlnhmtcajibmagrymmq.appsync-api.eu-central-1.amazonaws.com/graphql',{
+    const response = await fetch(process.env.REACT_APP_appsync_url!,{
         method: 'POST',
         body: JSON.stringify({
-            query:`query getContentByIdQuery{
-                            getContentById(page:`+page+`){
-                            }
-                        }`
+                                query:`query getContentByIdQuery{
+                                            getContent(page:`+page+`){
+                                                page
+                                                total_pages
+                                                total_results
+                                                results {
+                                                  id
+                                                  backdrop_path
+                                                  title
+                                                }
+                                            }
+                                        }`
         }),
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            // 'x-api-key':process.env.REACT_APP_appsync_api_key!
-            'Authorization': (await Auth.currentAuthenticatedUser())?.getAccessToken().getJwtToken()
+            'Authorization': (await Auth.currentAuthenticatedUser())?.signInUserSession?.accessToken?.jwtToken!
         }
     })
+
     const responseAsJson = await response.json()
     if(responseAsJson?.errors){
-        throw new Error('error: ' + responseAsJson?.errors)
+        console.error("responseAsJson.errors: ",responseAsJson.errors)
+        redirectToErrorPage(responseAsJson?.errors[0].errorType)
     }
-    return await Promise<{
+
+    return {
         page: 1,
         results: [
             {
@@ -426,12 +436,12 @@ export async function getContent(page: number):Promise<any>{
         ],
         total_pages: 40406,
         total_results: 808106
-    }>
+    }
 }
 
 export async function getContentById(id: string):Promise<contentType>{
     debugger
-    const response = await fetch('https://jph3t55dlnhmtcajibmagrymmq.appsync-api.eu-central-1.amazonaws.com/graphql',{
+    const response = await fetch(process.env.REACT_APP_appsync_url!,{
         method: 'POST',
         body: JSON.stringify({
             query:`query getContentByIdQuery{
@@ -444,13 +454,14 @@ export async function getContentById(id: string):Promise<contentType>{
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            // 'x-api-key':process.env.REACT_APP_appsync_api_key!
-            'Authorization': (await Auth.currentAuthenticatedUser())?.getAccessToken().getJwtToken()
+            'Authorization': (await Auth.currentAuthenticatedUser())?.signInUserSession?.accessToken?.jwtToken
         }
     })
+
     const responseAsJson = await response.json()
     if(responseAsJson?.errors){
-        throw new Error('error: ' + responseAsJson?.errors)
+        redirectToErrorPage(responseAsJson?.errors[0].errorType)
     }
+
     return {title:responseAsJson.data.getContentById.title,link:"https://www.youtube.com/embed/"+responseAsJson.data.getContentById.link}
 }

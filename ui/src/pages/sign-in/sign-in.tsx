@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import './sign-in.scss';
-import NavBar from '../../components/nav-bar/nav-bar';
-import { Auth } from 'aws-amplify';
+import React, { useEffect, useState } from 'react'
+import './sign-in.scss'
+import { Auth } from 'aws-amplify'
+import { redirectIfLoggedIn } from '../../utils/auth'
+import { showLoader, tailspin } from '../../components/loader/loader'
+import { redirectToErrorPage } from '../../utils/error'
 
 
 function SignIn() {
@@ -10,6 +12,13 @@ function SignIn() {
     email: "",
     password: "",
   })
+  const [isVerifyStep, setIsVerifyStep] = useState(false)
+  const [verifyCode, setVerifyCode] = useState("")
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    redirectIfLoggedIn().then(() => setLoading(false))
+  },[])
 
   function handleChange(event:any) {
     setUserFormFields({...userFormFields, [event.target.attributes[0].nodeValue]: event.target.value})
@@ -24,19 +33,44 @@ function SignIn() {
           email: userFormFields.email
         }
       })
-      console.log("jwt: ", (await Auth.currentAuthenticatedUser())?.getAccessToken().getJwtToken())
-      // eslint-disable-next-line no-restricted-globals
-      location.href = '/'
-    } catch (error) {
-      console.error('error signing up:', error)
+      .then(() => setIsVerifyStep(true))
+    } catch (error:any) {
+      redirectToErrorPage(error)
     }
+  }
+
+  async function verifyUser() {
+      await Auth.confirmSignUp(userFormFields.email, verifyCode)
+      .then(async (result)=>{
+        console.log("sign up verification result: ",result)
+        if(result === 'SUCCESS'){
+          await redirectIfLoggedIn()
+        }else{
+          redirectToErrorPage('Verification failed, try again')
+        }
+      })
+      .catch((error) =>
+        redirectToErrorPage(error?.message) 
+      )
+  }
+
+  async function login(){
+    debugger
+    await Auth.signIn(userFormFields.email, userFormFields.password)
+    .then(async ()=> await redirectIfLoggedIn())
+    .catch((error)=>{
+      if(error?.message !== 'User is not confirmed.'){
+        redirectToErrorPage(error?.message)
+      }
+      setIsVerifyStep(true)
+    })
   }
 
   function renderSignInBtn(){
     if(swapSignInMode){
-      return <div id="subscribe" onClick={()=>{login()}}>Login</div>
+      return <div className="btn" onClick={()=>{login()}}>Login</div>
     }
-    return <div id="subscribe" onClick={()=>{signUp()}}>Sign up</div>
+    return <div className="btn" onClick={()=>{signUp()}}>Sign up</div>
   }
 
   function renderSignInForm(){
@@ -47,36 +81,53 @@ function SignIn() {
                 <div
                   className="switch"
                   onClick={()=>{setSwapSignInMode(false)}}
-                >Sign up</div>
+                >
+                  Sign up
+                </div>
                 <div
                   className="switch"
                   onClick={()=>{setSwapSignInMode(true)}}
-                >Login</div>
+                >
+                  Login
+                </div>
           </div>
           <input type='email' placeholder="Email" value={userFormFields.email} onChange={handleChange}></input>
           <input type='password' placeholder="Password" value={userFormFields.password} onChange={handleChange}></input>
+          {renderSignInBtn()}
         </div>
-        {renderSignInBtn()}
       </div>
     )
   }
-  
-  async function login(){
-    try {
-      await Auth.signIn(userFormFields.email, userFormFields.password)
-      console.log("jwt: ", (await Auth.currentAuthenticatedUser())?.getAccessToken().getJwtToken())
-      // eslint-disable-next-line no-restricted-globals
-      location.href = '/'
-    } catch (error) {
-      console.log('error signing in', error)
-    }
+
+  function renderCodeVerification(){
+    return(
+      <div className="VerifyCode-container">
+        <div className="sub-container">
+          <div className="instructions">Please enter the verification code sent to your email. If you haven't received one, please wait 5 minutes before requesting another.</div>
+          <div className='VerifyCode-input-container'>
+            <input type="email" value={userFormFields.email} name="email" placeholder="Email"/>
+            <input type="text" value={verifyCode} onChange={(event) => setVerifyCode(event.target.value)} name="verifyCode" placeholder="Verification code"/>
+            <div className='btn-container'>
+              <div onClick={verifyUser} className='btn'>Verify</div>
+              <div onClick={verifyUser} className='btn'>Resend</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
+
+  function renderSignInOrVerifyMode(){
+    if(isVerifyStep){
+      return renderCodeVerification()
+    }
+    return renderSignInForm()
+  }
+  
   return (
-    <>
-      <NavBar showBackBtn={true}/>
-      {renderSignInForm()}
-    </>
-  );
+    showLoader(loading,tailspin(),renderSignInOrVerifyMode())
+  )
 }
 
 export default SignIn;
+

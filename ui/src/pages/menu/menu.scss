@@ -3,24 +3,27 @@
     height: 100vh;
     display: grid;
     place-items: center;
-    .menu-btn{
+    .menu-btn-container{
+        height: calc(100vh - 15vmax);
+        position: absolute;
+        bottom: 0;
         display: grid;
         place-items: center;
-        font-size: 1vmax;
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0) 90.71%);
-        padding: 2vmax;
-        border-radius: 5vmax;
-        padding-left: 6vmax;
-        padding-right: 6vmax;
-        -webkit-user-select: none; /* Safari */
-        -ms-user-select: none; /* IE 10 and IE 11 */
-        user-select: none; /* Standard syntax */
-        cursor: pointer;
-        color: rgba(255,255,255,1);
-        font-size: 5vmax;
-        p{
-            
-            margin: 0;
+        .menu-btn{
+            display: grid;
+            place-items: center;
+            font-size: 1vmax;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0) 90.71%);
+            padding: 2vmax;
+            border-radius: 5vmax;
+            padding-left: 6vmax;
+            padding-right: 6vmax;
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10 and IE 11 */
+            user-select: none; /* Standard syntax */
+            cursor: pointer;
+            color: rgba(255,255,255,1);
+            font-size: 5vmax;
         }
     }
 }

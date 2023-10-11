@@ -102,11 +102,13 @@ export class IacStack extends cdk.Stack {
           {
             authorizationType: cdk.aws_appsync.AuthorizationType.USER_POOL,
             userPoolConfig: {
-              userPool: userPool
+              userPool: userPool,
+              defaultAction: cdk.aws_appsync.UserPoolDefaultAction.ALLOW
             }
           }
         ]
-      }
+      },
+      xrayEnabled: true
     })
 
     const mainLambda = new cdk.aws_lambda.Function(this, process.env.main_lambda_handler!, {
