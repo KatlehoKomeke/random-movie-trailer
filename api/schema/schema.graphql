@@ -32,6 +32,6 @@ type Result @aws_api_key
 
 type Query @aws_api_key
 @aws_cognito_user_pools(cognito_groups: ["User"]) {
-	getContent(page: Int!): Contents
+	getContent(page: Int!): Contents!
 	getContentById(id: Int!): Content!
 }

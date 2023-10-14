@@ -1,6 +1,6 @@
 import axios from 'axios'
 import * as dotenv from 'dotenv'
-import { result } from '../types/types'
+import { Contents } from '../types/types'
 
 // The project is not suppplied with 
 // a .env as that is bad practice. 
@@ -9,27 +9,58 @@ import { result } from '../types/types'
 // one.
 dotenv.config()
 
-async function getContent(page: number): Promise<{page: number,results: result[],total_pages: number,total_results: number}>{
+axios.defaults.headers.common['accept'] = 'application/json'
+axios.defaults.headers.common['Authorization'] ='Bearer '+process.env.tmdb_api_key!
 
-    axios.defaults.headers.common['accept'] = 'application/json'
-    axios.defaults.headers.common['Authorization'] ='Bearer '+process.env.tmdb_api_key!
+async function getContent(page: number): Promise<Contents>
+{
 
-    let data:{page: number,results: result[],total_pages: number,total_results: number} = {page: 0,results: [],total_pages: 0,total_results: 0}
+    let data = {
+                page: 0,
+                results: [ {
+                    adult: false,
+                    backdrop_path: "",
+                    genre_ids: [0],
+                    id: 0,
+                    original_language: "",
+                    original_title: "",
+                    overview: "",
+                    popularity: 0,
+                    poster_path: "",
+                    release_date: "",
+                    title: "",
+                    video: true,
+                    vote_average: 0,
+                    vote_count: 0
+                }],
+                total_pages: 0,
+                total_results: 0
+              }
     
     // GET request contents
     await axios({
         method: 'get',
-        url: 'https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page='+page+'&sort_by=popularity.desc',
+        url: 'https://api.themoviedb.org/3/discover/movie?page='+page+'&sort_by=popularity.desc',
         responseType: 'json'
     })
-    .then(async function (response) {
-        console.log("response: ",response)
+    .then((response)=> {
+        if(response.data){
+            data = response.data
+            console.log("data @getContent: ",data)
+        }else{
+            throw new Error('response is empty :(')
+        }
     })
     .catch((error)=>{
         throw new Error("error @getContent: "+error.message)
     })
 
-    return data
+    return {
+            page: data.page,
+            results: data.results,
+            total_pages: data.total_pages,
+            total_results: data.total_results
+           }
 }
 
 export default getContent

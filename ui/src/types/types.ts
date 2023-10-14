@@ -8,6 +8,7 @@ export type NavBarOptions = {
     showSignIn?: true;
     showBackBtn?: true;
     showMenuBtn?: true;
+    redirectURL?: string;
 }
 
 export type ContentProps = {

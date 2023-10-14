@@ -1,5 +1,6 @@
 *.js
-/bin/*d.ts
-/lib/*d.ts
-/test/*d.ts
-/types/*d.ts
+/bin/*.d.ts
+/lib/*.d.ts
+/test/*.d.ts
+/types/*.d.ts
+/triggers/*.d.ts

@@ -12,7 +12,7 @@ dotenv.config()
 axios.defaults.headers.common['accept'] = 'application/json'
 axios.defaults.headers.common['Authorization'] ='Bearer '+process.env.tmdb_api_key!
 
-async function getTitle(id:number){
+async function getTitle(id:number):Promise<string>{
     let title = ''
     // GET request for title
     await axios({
@@ -20,9 +20,7 @@ async function getTitle(id:number){
         url: 'https://api.themoviedb.org/3/movie/'+id+'?language=en-US',
         responseType: 'json'
     })
-    .then(function (response) {
-        title = response.data.title
-    })
+    .then((response)=>title = response.data.title)
     .catch((error)=>{
         throw new Error("error @title getter: "+error.message)
     })
@@ -30,7 +28,7 @@ async function getTitle(id:number){
     return title
 }
 
-async function getLink(id:number){
+async function getLink(id:number):Promise<string>{
     let link = ''
     // GET request for video link
     await axios({

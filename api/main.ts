@@ -1,4 +1,5 @@
 
+import getContent from './lambdas/getContent'
 import getContentById from './lambdas/getContentById'
 import * as dotenv from 'dotenv'
 
@@ -11,8 +12,11 @@ dotenv.config()
 
 export const handler = async (appSyncEvent:any) => {
     console.log("appSyncEvent: ",appSyncEvent)
-    
+    // todo: handleMaliciousPayload(appSyncEvent)
+
     switch (appSyncEvent?.info?.fieldName) {
+        case "getContent":
+            return await getContent(appSyncEvent.arguments.page)
         case "getContentById":
             return await getContentById(appSyncEvent.arguments.id)
         default:

@@ -24,6 +24,8 @@ declare global {
             main_lambdaDS: string;
             get_content_by_id_resolver: string;
             get_content_by_id: string;
+            get_content_resolver: string;
+            get_content: string;
 
             user_behaviour_table: string;
             user_behaviour_table_partition_key: string;

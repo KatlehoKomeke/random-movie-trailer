@@ -9,6 +9,7 @@
         display: grid;
         place-items: center;
         align-content: space-evenly;
+        grid-template-rows: auto 1fr;
         h1{
             font-size: 2vmax;
             height: min-content;

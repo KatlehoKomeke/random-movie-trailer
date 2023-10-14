@@ -1,9 +1,10 @@
 import { Callback, Context, PostConfirmationTriggerEvent } from "aws-lambda";
-import AWS from "aws-sdk";
+import * as AWS from 'aws-sdk';
 
-export async function main(event: PostConfirmationTriggerEvent, _context: Context, callback: Callback): Promise<void> {
+export async function handler(event: PostConfirmationTriggerEvent, _context: Context, callback: Callback): Promise<void> {
   const { userPoolId, userName } = event
-
+  console.log(`PostConfirmationTriggerEvent: ${event}`)
+  console.log(`_context: ${_context}`)
   try {
     await addUserToGroup({
       userPoolId,
@@ -13,6 +14,7 @@ export async function main(event: PostConfirmationTriggerEvent, _context: Contex
 
     return callback(null, event)
   } catch (error:any) {
+    console.error('error: ',error)
     return callback(error, event)
   }
 }

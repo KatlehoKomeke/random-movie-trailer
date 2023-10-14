@@ -57,26 +57,51 @@ export class IacStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN_ON_UPDATE_OR_DELETE
     })
 
+    new cdk.aws_cognito.CfnUserPoolGroup(this, "CognitoUserGroup", {
+      groupName: "User",
+      description: 'Gives anyone belonging to this group access to appsync.',
+      userPoolId: userPool.userPoolId
+    })
+
+    const addCognitoUserToGroupTriggerFn = new cdk.aws_lambda.Function(this, 'addCognitoUserToGroupTriggerFn', {
+      runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
+      handler: 'addCognitoUserToGroup.handler',
+      code: cdk.aws_lambda.Code.fromAsset('./triggers')
+    })
+
+    const cognitoAddUserToGroup = new cdk.aws_iam.PolicyStatement({
+      actions: ['cognito-idp:AdminAddUserToGroup'],
+      resources: [userPool.userPoolArn]
+    })
+
+    addCognitoUserToGroupTriggerFn.role?.attachInlinePolicy(
+      new cdk.aws_iam.Policy(this, 'access-to-cognito-policy', {
+        statements: [cognitoAddUserToGroup]
+      })
+    )
+
+    userPool.addTrigger(cdk.aws_cognito.UserPoolOperation.POST_AUTHENTICATION, addCognitoUserToGroupTriggerFn)
+
     const clientReadAttributes = new cdk.aws_cognito.ClientAttributes()
-    .withStandardAttributes(standardCognitoAttributes)
-    .withCustomAttributes('createdAt')
+                                 .withStandardAttributes(standardCognitoAttributes)
+                                 .withCustomAttributes('createdAt')
 
     const clientWriteAttributes = new cdk.aws_cognito.ClientAttributes()
-    .withStandardAttributes({
-      ...standardCognitoAttributes,
-      email: false,
-      emailVerified: false,
-      phoneNumberVerified: false,
-      lastUpdateTime: false
-    })
+                                  .withStandardAttributes({
+                                    ...standardCognitoAttributes,
+                                    email: false,
+                                    emailVerified: false,
+                                    phoneNumberVerified: false,
+                                    lastUpdateTime: false
+                                  })
 
     new cdk.aws_cognito.UserPoolClient(this, process.env.user_pool_client!, {
       userPool,
       supportedIdentityProviders: [
-        cdk.aws_cognito.UserPoolClientIdentityProvider.COGNITO,
+        cdk.aws_cognito.UserPoolClientIdentityProvider.COGNITO
       ],
       readAttributes: clientReadAttributes,
-      writeAttributes: clientWriteAttributes,
+      writeAttributes: clientWriteAttributes
     })
 
     // Creates a graphql API using AppSync
@@ -124,6 +149,11 @@ export class IacStack extends cdk.Stack {
     mainLambdaDS.createResolver(process.env.get_content_by_id_resolver!,{
       typeName: graphqlQueryType.Query,
       fieldName: process.env.get_content_by_id!
+    })
+
+    mainLambdaDS.createResolver(process.env.get_content_resolver!,{
+      typeName: graphqlQueryType.Query,
+      fieldName: process.env.get_content!
     })
     
     const userBehaviourTable = new cdk.aws_dynamodb.Table(this, process.env.user_behaviour_table!, {

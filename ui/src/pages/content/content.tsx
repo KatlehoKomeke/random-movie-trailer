@@ -24,7 +24,7 @@ function Content() {
 
     useEffect(() => {
         redirectIfNotLoggedIn()
-        .then(() => loadContent())
+        .then(async () => await loadContent())
         .then(() => setLoading(false))
     },[])
 

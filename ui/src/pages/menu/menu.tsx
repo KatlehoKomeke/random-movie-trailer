@@ -13,6 +13,7 @@ function Menu() {
         redirectIfNotLoggedIn().then(() => setLoading(false))
     },[])
     async function logout(){
+        setLoading(true)
         try{
             await Auth.signOut()
             await redirectIfNotLoggedIn()
@@ -21,6 +22,7 @@ function Menu() {
         }
     }
     async function deleteUser(){
+        setLoading(true)
         try{
             await Auth.deleteUser()
             .then((isUserDeleted) => {

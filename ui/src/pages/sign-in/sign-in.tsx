@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import './sign-in.scss'
 import { Auth } from 'aws-amplify'
-import { redirectIfLoggedIn } from '../../utils/auth'
+import { redirectIfLoggedIn} from '../../utils/auth'
 import { showLoader, tailspin } from '../../components/loader/loader'
 import { redirectToErrorPage } from '../../utils/error'
 
 
 function SignIn() {
+  const [verificationHeader,setVerificationHeader] = useState("Please enter the verification code sent to your email. If you haven't received one, please wait 5 minutes before requesting another.")
   const [swapSignInMode,setSwapSignInMode] = useState(false)
   const [userFormFields, setUserFormFields] = useState({
     email: "",
@@ -20,42 +21,67 @@ function SignIn() {
     redirectIfLoggedIn().then(() => setLoading(false))
   },[])
 
-  function handleChange(event:any) {
+  function updateUserCredentials(event:any) {
     setUserFormFields({...userFormFields, [event.target.attributes[0].nodeValue]: event.target.value})
   }
   
   async function signUp(){
-    try {
-      await Auth.signUp({
-        username: userFormFields.email,
-        password: userFormFields.password,
-        attributes: {
-          email: userFormFields.email
-        }
-      })
-      .then(() => setIsVerifyStep(true))
-    } catch (error:any) {
-      redirectToErrorPage(error)
-    }
+    setLoading(true)
+    await Auth.signUp({
+      username: userFormFields.email,
+      password: userFormFields.password,
+      attributes: {
+        email: userFormFields.email
+      }
+    })
+    .then(() => {
+      setIsVerifyStep(true)
+      setLoading(false)
+    })
+    .catch((error)=>redirectToErrorPage(error))
   }
 
   async function verifyUser() {
-      await Auth.confirmSignUp(userFormFields.email, verifyCode)
-      .then(async (result)=>{
-        console.log("sign up verification result: ",result)
-        if(result === 'SUCCESS'){
-          await redirectIfLoggedIn()
-        }else{
-          redirectToErrorPage('Verification failed, try again')
-        }
-      })
-      .catch((error) =>
-        redirectToErrorPage(error?.message) 
-      )
+    setLoading(true)
+    await Auth.confirmSignUp(userFormFields.email, verifyCode)
+    .then(async (result)=>{
+      if(result === 'SUCCESS'){
+        await login()
+      }else{
+        redirectToErrorPage('Verification failed, try again')
+      }
+    })
+    .catch((error) =>
+      redirectToErrorPage(error?.message) 
+    )
+  }
+
+  async function resendVerificationCode() {
+    setLoading(true)
+    await Auth.resendSignUp(userFormFields.email)
+    .then(async (result)=>{
+      setLoading(false)
+      setVerificationHeader('Another verification code has been sent. Please check your email.')
+    })
+    .catch((error) =>
+      redirectToErrorPage(error?.message) 
+    )
   }
 
   async function login(){
-    debugger
+    setLoading(true)
+
+    await Auth.currentUserInfo()
+    .then(async (userInfo) => {
+      if(userInfo){
+        await Auth.currentAuthenticatedUser()
+        .catch(() => {
+          setIsVerifyStep(true)
+          setLoading(false)
+        })
+      }
+    })
+
     await Auth.signIn(userFormFields.email, userFormFields.password)
     .then(async ()=> await redirectIfLoggedIn())
     .catch((error)=>{
@@ -63,6 +89,7 @@ function SignIn() {
         redirectToErrorPage(error?.message)
       }
       setIsVerifyStep(true)
+      setLoading(false)
     })
   }
 
@@ -78,21 +105,15 @@ function SignIn() {
       <div className='sign-in'>
         <div className="input-container">
           <div className="sign-up_login-switch">
-                <div
-                  className="switch"
-                  onClick={()=>{setSwapSignInMode(false)}}
-                >
+                <div className="switch" onClick={()=>{setSwapSignInMode(false)}}>
                   Sign up
                 </div>
-                <div
-                  className="switch"
-                  onClick={()=>{setSwapSignInMode(true)}}
-                >
+                <div className="switch" onClick={()=>{setSwapSignInMode(true)}}>
                   Login
                 </div>
           </div>
-          <input type='email' placeholder="Email" value={userFormFields.email} onChange={handleChange}></input>
-          <input type='password' placeholder="Password" value={userFormFields.password} onChange={handleChange}></input>
+          <input type='email' placeholder="Email" value={userFormFields.email} onChange={updateUserCredentials}></input>
+          <input type='password' placeholder="Password" value={userFormFields.password} onChange={updateUserCredentials}></input>
           {renderSignInBtn()}
         </div>
       </div>
@@ -103,15 +124,14 @@ function SignIn() {
     return(
       <div className="VerifyCode-container">
         <div className="sub-container">
-          <div className="instructions">Please enter the verification code sent to your email. If you haven't received one, please wait 5 minutes before requesting another.</div>
+          <div className="instructions">{verificationHeader}</div>
           <div className='VerifyCode-input-container'>
-            <input type="email" value={userFormFields.email} name="email" placeholder="Email"/>
-            <input type="text" value={verifyCode} onChange={(event) => setVerifyCode(event.target.value)} name="verifyCode" placeholder="Verification code"/>
-            <div className='btn-container'>
-              <div onClick={verifyUser} className='btn'>Verify</div>
-              <div onClick={verifyUser} className='btn'>Resend</div>
-            </div>
+            <input type="text" value={verifyCode} onChange={(event) => setVerifyCode(event.target.value)} name="verifyCode" placeholder="Enter verification code"/>
           </div>
+          <div className='btn-container'>
+              <div onClick={verifyUser} className='btn'>Verify</div>
+              <div onClick={resendVerificationCode} className='btn'>Resend</div>
+            </div>
         </div>
       </div>
     )
