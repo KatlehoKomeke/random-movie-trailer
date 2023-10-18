@@ -6,6 +6,7 @@ import { Auth } from 'aws-amplify'
 import { redirectIfNotLoggedIn } from '../../utils/auth'
 import { showLoader, tailspin } from '../../components/loader/loader'
 import { redirectToErrorPage } from '../../utils/error'
+import { deleteWatchlist } from '../../utils/watchlist'
 
 function Menu() {
     const [loading, setLoading] = useState(true)
@@ -21,20 +22,26 @@ function Menu() {
             redirectToErrorPage(error?.message)
         }
     }
+
     async function deleteUser(){
-        setLoading(true)
-        try{
-            await Auth.deleteUser()
-            .then((isUserDeleted) => {
-                if(isUserDeleted === 'SUCCESS'){
-                    redirectIfNotLoggedIn()
-                }else{
-                    redirectToErrorPage('Account deletion failed')
-                }
-            })
-        } catch (error:any) {
+        await Auth.deleteUser()
+        .then((isUserDeleted) => {
+            if(isUserDeleted === 'SUCCESS'){
+                redirectIfNotLoggedIn()
+            }else{
+                redirectToErrorPage('Account deletion failed')
+            }
+        })
+        .catch((error) =>
             redirectToErrorPage(error?.message)
-        }
+        )
+    }
+
+    async function deleteWatchlistAndUser(){
+        setLoading(true)
+        await deleteWatchlist()
+        .then(() => deleteUser())
+        .catch(() => deleteUser())
     }
     function renderMenu(){
         return(
@@ -42,7 +49,7 @@ function Menu() {
                 <NavBar showBackBtn={true}/>
                 <div className='menu-btn-container'>
                     <div className='menu-btn' onClick={logout}>logout</div>  
-                    <div className='menu-btn' onClick={deleteUser}>delete account</div>
+                    <div className='menu-btn' onClick={deleteWatchlistAndUser}>delete account</div>
                 </div>           
             </div>
         )

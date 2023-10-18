@@ -12,13 +12,13 @@ function LandingPage() {
   
   const [loading, setLoading] = useState(true)
   const [contents,setContents] = useState({page:0,results:[initResults],total_pages:0,total_results:0})
+ 
+  // Restricted to 500 by third party API
+  const totalPages = 500
 
   useEffect(() => {
       redirectIfNotLoggedIn().then(async () => {
-        await getContent(1).then((contents:any) =>{
-          setContents({page:contents.page,results:contents.results,total_pages:contents.total_pages,total_results:contents.total_results})
-          setLoading(false)
-        })
+        await fetchMoreData()
       })
       .catch((error:any) => {
         redirectToErrorPage(error?.message)
@@ -29,16 +29,50 @@ function LandingPage() {
     return(
       <div className="landing-page-container">
         <NavBar showLogo={true} showMenuBtn={true}/>
-        <div className='content-display-container-box'>
+          {
+            renderInfiniteScroll()
+          }
+      </div>
+    )
+  }
+
+  function getRandomInt(max:number) {
+    return Math.floor(Math.random() * max);
+  }
+
+  async function fetchMoreData(){
+    await getContent(getRandomInt(totalPages))
+    .then((contents:any) => {
+      setContents({page:contents.page,results:contents.results,total_pages:contents.total_pages,total_results:contents.total_results})
+    })
+    .then(() => {
+      setLoading(false)
+    })
+    .catch((error:any) => {
+      redirectToErrorPage(error.message)
+    })
+  }
+
+  const handleScroll = async (e:any) => {
+    const bottom = (e.target.scrollHeight - e.target.scrollTop) <= e.target.clientHeight
+
+    if (bottom) { 
+      setLoading(true)
+      await fetchMoreData()
+    }
+  }
+
+  function renderInfiniteScroll(){
+    return(
+        <div className='content-display-container-box' onScroll={handleScroll}>
           {
             contents.results.map(
               function(data){
-                return(<ContentDisplay image={'https://image.tmdb.org/t/p/w500/'+data.backdrop_path} title={data.title} id={data.id}/>)
+                return(<ContentDisplay image={data.backdrop_path} title={data.title} id={data.id}/>)
               }
             )
           }
         </div>
-      </div>
     )
   }
   return (

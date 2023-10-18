@@ -14,7 +14,6 @@ axios.defaults.headers.common['Authorization'] ='Bearer '+process.env.tmdb_api_k
 
 async function getContent(page: number): Promise<Contents>
 {
-
     let data = {
                 page: 0,
                 results: [ {
@@ -46,13 +45,13 @@ async function getContent(page: number): Promise<Contents>
     .then((response)=> {
         if(response.data){
             data = response.data
-            console.log("data @getContent: ",data)
         }else{
             throw new Error('response is empty :(')
         }
     })
     .catch((error)=>{
-        throw new Error("error @getContent: "+error.message)
+        console.error("error @getContent: ",error.message)
+        throw new Error("could not get content")
     })
 
     return {

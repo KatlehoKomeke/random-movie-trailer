@@ -1,6 +1,9 @@
 .content-container{
     width: 100vw;
     height: 100vh;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
     .sub-content-container{
         position: absolute;
         bottom: 0;
@@ -21,6 +24,17 @@
             max-height: 60vh;
             border-radius: 2vmax;
             overflow: hidden;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            h1{
+                background: rgba(25,25,25,0.3);
+                text-align: center;
+                padding: 2vmax;
+                border-radius: 4vmax;
+                width: min-content;
+                white-space: nowrap;
+            }
         }
     }
 }

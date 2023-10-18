@@ -26,6 +26,9 @@ function Error() {
             if(searchParams.get('error')?.includes('Username')){
                 setErrorMessage('Email is invalid')
             }
+            if(searchParams.get('error') && searchParams.get('error') === 'User does not exist.'){
+                setCustomRedirect(URL_Redirect.SignIn)
+            }
             if(searchParams.get('error') && searchParams.get('error') === 'Unauthorized'){
                 Auth.currentUserInfo().then(async (userInfo)=>{
                     if(userInfo){

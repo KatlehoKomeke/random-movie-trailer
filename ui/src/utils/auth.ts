@@ -1,6 +1,10 @@
-import { Auth } from 'aws-amplify';
+import { Auth } from 'aws-amplify'
 import { URL_Redirect } from '../types/types';
 import { redirectToErrorPage } from './error';
+
+export const jwt = async ():Promise<string> => {
+    return (await Auth.currentAuthenticatedUser())?.signInUserSession?.accessToken?.jwtToken!
+}
 
 export function redirectTo(redirect_page:string|undefined){
     // eslint-disable-next-line no-restricted-globals

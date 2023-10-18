@@ -30,8 +30,26 @@ type Result @aws_api_key
 	vote_count: Int
 }
 
+type GetWatchlistResponse @aws_api_key
+@aws_cognito_user_pools(cognito_groups: ["User"]){
+	watchlist: [Int]
+}
+
 type Query @aws_api_key
 @aws_cognito_user_pools(cognito_groups: ["User"]) {
 	getContent(page: Int!): Contents!
-	getContentById(id: Int!): Content!
+	getContentById(movieId: Int!): Content!
+	getWatchlist(email:String!): GetWatchlistResponse!
 }
+
+type WatchlistMutationResponse @aws_api_key
+@aws_cognito_user_pools(cognito_groups: ["User"]){
+	isSuccessful: Boolean!
+}
+
+type Mutation @aws_api_key
+@aws_cognito_user_pools(cognito_groups: ["User"]) {
+	deleteWatchlist(email:String!): WatchlistMutationResponse!
+	updateWatchlist(movieId:Int!,email:String!): WatchlistMutationResponse!
+}
+                                            

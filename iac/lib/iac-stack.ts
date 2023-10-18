@@ -142,7 +142,7 @@ export class IacStack extends cdk.Stack {
       code: cdk.aws_lambda.Code.fromAsset(process.env.main_handler_dirname!),
       memorySize: parseInt(process.env.lambda_size!)
     })
-
+    
     // Set the new Lambda function as a data source for the AppSync API
     const mainLambdaDS = api_graphql.addLambdaDataSource(process.env.main_lambdaDS!, mainLambda);
 
@@ -155,6 +155,21 @@ export class IacStack extends cdk.Stack {
       typeName: graphqlQueryType.Query,
       fieldName: process.env.get_content!
     })
+
+    mainLambdaDS.createResolver(process.env.get_watchlist_resolver!,{
+      typeName: graphqlQueryType.Query,
+      fieldName: process.env.get_watchlist!
+    })
+
+    mainLambdaDS.createResolver(process.env.update_watchlist_resolver!,{
+      typeName: graphqlQueryType.Mutation,
+      fieldName: process.env.update_watchlist!
+    })
+
+    mainLambdaDS.createResolver(process.env.delete_watchlist_resolver!,{
+      typeName: graphqlQueryType.Mutation,
+      fieldName: process.env.delete_watchlist!
+    })
     
     const userBehaviourTable = new cdk.aws_dynamodb.Table(this, process.env.user_behaviour_table!, {
       billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -165,11 +180,11 @@ export class IacStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN
     })
 
-    // enable the Lambda function to access the DynamoDB table (using IAM)
-    // userBehaviourTable.grantFullAccess(signUpLambda)
+    // Giving the main lambda function full access to the userBehaviourTable
+    userBehaviourTable.grantFullAccess(mainLambda)
 
-    // Create an environment variable that we will use in the function code
-    // signUpLambda.addEnvironment(process.env.user_table!, userBehaviourTable.tableName)
+    // Passing the name of the user table
+    mainLambda.addEnvironment(process.env.user_behaviour_table!, userBehaviourTable.tableName)
 
     const cloudfrontBucket = new cdk.aws_s3.Bucket(this, process.env.s3_bucket!, {
       encryption: cdk.aws_s3.BucketEncryption.S3_MANAGED,

@@ -5,7 +5,6 @@ import { redirectIfLoggedIn} from '../../utils/auth'
 import { showLoader, tailspin } from '../../components/loader/loader'
 import { redirectToErrorPage } from '../../utils/error'
 
-
 function SignIn() {
   const [verificationHeader,setVerificationHeader] = useState("Please enter the verification code sent to your email. If you haven't received one, please wait 5 minutes before requesting another.")
   const [swapSignInMode,setSwapSignInMode] = useState(false)
@@ -70,48 +69,50 @@ function SignIn() {
 
   async function login(){
     setLoading(true)
-
-    await Auth.currentUserInfo()
-    .then(async (userInfo) => {
-      if(userInfo){
-        await Auth.currentAuthenticatedUser()
-        .catch(() => {
-          setIsVerifyStep(true)
-          setLoading(false)
-        })
-      }
-    })
-
     await Auth.signIn(userFormFields.email, userFormFields.password)
     .then(async ()=> await redirectIfLoggedIn())
     .catch((error)=>{
       if(error?.message !== 'User is not confirmed.'){
         redirectToErrorPage(error?.message)
+      }else{
+        setIsVerifyStep(true)
+        setLoading(false)
       }
-      setIsVerifyStep(true)
-      setLoading(false)
     })
   }
 
   function renderSignInBtn(){
     if(swapSignInMode){
-      return <div className="btn" onClick={()=>{login()}}>Login</div>
+      return (
+        <>
+          <div className="btn" onClick={login}>Login</div>
+          <p>Don't have an acccount? <></></p>
+        </>
+        
+      )
     }
-    return <div className="btn" onClick={()=>{signUp()}}>Sign up</div>
+    return (
+      <>
+        <div className="btn" onClick={signUp}>Sign up</div> 
+        <div className='switchToLoginMode'>
+          <p>Already have an acccount? </p> <>login</>
+        </div>
+      </>
+    )
   }
 
   function renderSignInForm(){
     return(
       <div className='sign-in'>
         <div className="input-container">
-          <div className="sign-up_login-switch">
+          {/* <div className="sign-up_login-switch">
                 <div className="switch" onClick={()=>{setSwapSignInMode(false)}}>
                   Sign up
                 </div>
                 <div className="switch" onClick={()=>{setSwapSignInMode(true)}}>
                   Login
                 </div>
-          </div>
+          </div> */}
           <input type='email' placeholder="Email" value={userFormFields.email} onChange={updateUserCredentials}></input>
           <input type='password' placeholder="Password" value={userFormFields.password} onChange={updateUserCredentials}></input>
           {renderSignInBtn()}

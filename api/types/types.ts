@@ -1,3 +1,16 @@
+// enums
+
+export enum video_type {
+    YouTube = "YouTube",
+    Vimeo = "Vimeo"
+}
+
+export enum video_embed_link {
+    YouTube = "https://www.youtube.com/embed/"
+}
+
+// types 
+
 export type result = {
     adult: boolean,
     backdrop_path: string,
@@ -22,7 +35,7 @@ export type Contents = {
     total_pages: number
 } 
 
-export enum video_type {
-    YouTube = "YouTube",
-    Vimeo = "Vimeo"
+export type userBehaviour = {
+    email: string,
+
 }

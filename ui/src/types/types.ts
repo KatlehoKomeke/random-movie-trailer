@@ -1,3 +1,5 @@
+import { jwt } from "../utils/auth"
+
 export type contentType = {
     title: string;
     link: string;
@@ -69,4 +71,15 @@ export const initResults = {
     video: false,
     vote_average:0,
     vote_count: 0
+}
+
+export const headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Authorization': ""
+}
+
+export enum HTTP_METHOD {
+    POST = 'POST',
+    GET = 'GET'
 }
