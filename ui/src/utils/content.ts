@@ -27,7 +27,7 @@ export async function getContent(page: number):Promise<contentsType>{
         redirectToErrorPage(responseAsJson?.errors[0].errorType)
     }
 
-    return responseAsJson.data.getContent as contentsType
+    return responseAsJson?.data?.getContent as contentsType
 }
 
 export async function getContentById(id: string):Promise<contentType>{

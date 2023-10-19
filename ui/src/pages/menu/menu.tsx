@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import './menu.scss'
-
 import NavBar from '../../components/nav-bar/nav-bar'
 import { Auth } from 'aws-amplify'
-import { redirectIfNotLoggedIn } from '../../utils/auth'
+import { redirectIfNotLoggedIn, redirectTo } from '../../utils/auth'
 import { showLoader, tailspin } from '../../components/loader/loader'
 import { redirectToErrorPage } from '../../utils/error'
 import { deleteWatchlist } from '../../utils/watchlist'
@@ -48,6 +47,9 @@ function Menu() {
             <div className='menu-container'>
                 <NavBar showBackBtn={true}/>
                 <div className='menu-btn-container'>
+                    <div className='menu-btn' onClick={()=>{
+                        redirectTo('mailto:katkomza@gmail.com')
+                    }}>contact me</div>
                     <div className='menu-btn' onClick={logout}>logout</div>  
                     <div className='menu-btn' onClick={deleteWatchlistAndUser}>delete account</div>
                 </div>           

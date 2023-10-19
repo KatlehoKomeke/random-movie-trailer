@@ -15,7 +15,7 @@ const analyzers = [
     {
         description: "Validate origin",
         check: async (appSyncEvent:any) => {
-            if(appSyncEvent.request.headers.origin !== 'http://localhost:3000' && appSyncEvent.request.headers.origin !== 'https://eu-central-1.console.aws.amazon.com'){
+            if(appSyncEvent.request.headers.origin !== 'https://www.random-movie-trailer.com' && appSyncEvent.request.headers.origin !== 'https://random-movie-trailer.com' && appSyncEvent.request.headers.origin !== 'http://localhost:3000' && appSyncEvent.request.headers.origin !== 'https://eu-central-1.console.aws.amazon.com'){
                 throw new Error('invalid origin')
             }
         }

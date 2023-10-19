@@ -12,7 +12,7 @@ function NavBar(props: NavBarOptions) {
       { 
         props.showLogo
         ?
-          <Link to={props.redirectURL ?? "/"}>
+          <Link reloadDocument={true} to="/">
             <img src={logo} className='logo' alt='logo'></img>
           </Link>
         : null

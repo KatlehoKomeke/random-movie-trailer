@@ -13,6 +13,7 @@ function SignIn() {
     password: "",
   })
   const [isVerifyStep, setIsVerifyStep] = useState(false)
+  const [isResetPasswordStep, setIsResetPasswordStep] = useState(false)
   const [verifyCode, setVerifyCode] = useState("")
   const [loading, setLoading] = useState(true)
 
@@ -81,21 +82,72 @@ function SignIn() {
     })
   }
 
+  // Send confirmation code to user's email
+  async function forgotPassword(forgotPassword?: true) {
+    setLoading(true)
+    if(!userFormFields.email){
+      redirectToErrorPage('Please specify your email address before, resetting ')
+      return
+    }
+    setUserFormFields({...userFormFields,password: ""})
+    setIsVerifyStep(true)
+    if(forgotPassword){
+      setVerificationHeader('Another verification code has been sent. Please check your email.')
+    }
+    setIsResetPasswordStep(true)
+    await Auth.forgotPassword(userFormFields.email)
+    .then((data) => {     
+      if(data){
+        setLoading(false)
+      }
+      console.log("await Auth.forgotPassword(userFormFields.email)",data)
+    })
+    .catch((error) =>{
+      if(error.message !== 'Cannot reset password for the user as there is no registered/verified email or phone_number'){
+        redirectToErrorPage(error?.message)
+      }else{
+        setIsVerifyStep(true)
+        setIsResetPasswordStep(false)
+        setLoading(false)
+      }
+    })
+  }
+
+  // Collect confirmation code and new password
+  async function forgotPasswordSubmit() {
+    setLoading(true)
+    await Auth.forgotPasswordSubmit(userFormFields.email, verifyCode, userFormFields.password)
+    .then((response) => {
+      // eslint-disable-next-line no-restricted-globals
+      response === 'SUCCESS' ? setSwapSignInMode(true) : redirectToErrorPage('Password resest was unsuccessful')
+      setIsVerifyStep(false)
+      setLoading(false)
+    })
+    .catch((error) => redirectToErrorPage(error?.message))
+  }
+
+
   function renderSignInBtn(){
     if(swapSignInMode){
       return (
         <>
           <div className="btn" onClick={login}>Login</div>
-          <p>Don't have an acccount? <></></p>
+          <div>
+            <div className='switchSignInMode-container'>
+              <p>Forgot password?</p><p className='forgot-password' onClick={()=>forgotPassword()}>Reset</p>
+            </div>
+            <div className='switchSignInMode-container'>
+              <p>Don't have an acccount?</p> <p className='switchSignInMode' onClick={()=>setSwapSignInMode(false)}>Sign up</p>
+            </div>
+          </div>
         </>
-        
       )
     }
     return (
       <>
         <div className="btn" onClick={signUp}>Sign up</div> 
-        <div className='switchToLoginMode'>
-          <p>Already have an acccount? </p> <>login</>
+        <div className='switchSignInMode-container'>
+          <p>Already have an acccount? </p> <p className='switchSignInMode' onClick={()=>setSwapSignInMode(true)}>Login</p>
         </div>
       </>
     )
@@ -105,14 +157,6 @@ function SignIn() {
     return(
       <div className='sign-in'>
         <div className="input-container">
-          {/* <div className="sign-up_login-switch">
-                <div className="switch" onClick={()=>{setSwapSignInMode(false)}}>
-                  Sign up
-                </div>
-                <div className="switch" onClick={()=>{setSwapSignInMode(true)}}>
-                  Login
-                </div>
-          </div> */}
           <input type='email' placeholder="Email" value={userFormFields.email} onChange={updateUserCredentials}></input>
           <input type='password' placeholder="Password" value={userFormFields.password} onChange={updateUserCredentials}></input>
           {renderSignInBtn()}
@@ -138,9 +182,27 @@ function SignIn() {
     )
   }
 
+  function renderResetPassword(){
+    return(
+      <div className="ResetPassword-container">
+        <div className="sub-container">
+          <div className="instructions">{verificationHeader}</div>
+          <div className='VerifyCode-input-container'>
+            <input type="text" value={verifyCode} onChange={(event) => setVerifyCode(event.target.value)} name="verifyCode" placeholder="Enter verification code"/>
+            <input type="password" value={userFormFields.password} onChange={updateUserCredentials} name="newPassword" placeholder="Enter new password"/>
+          </div>
+          <div className='btn-container'>
+              <div onClick={forgotPasswordSubmit} className='btn'>Confirm</div>
+              <div onClick={()=>forgotPassword(true)} className='btn'>Resend</div>
+            </div>
+        </div>
+      </div>
+    )
+  }
+
   function renderSignInOrVerifyMode(){
     if(isVerifyStep){
-      return renderCodeVerification()
+      return isResetPasswordStep ? renderResetPassword() : renderCodeVerification()
     }
     return renderSignInForm()
   }

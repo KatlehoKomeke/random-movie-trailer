@@ -1,4 +1,6 @@
 .content-display-container{
+    text-decoration: none;
+    color: rgba(25,25,25,0.4);
     h2{
         text-overflow: ellipsis;
         width: 35vmax;
@@ -15,4 +17,5 @@
     -o-background-size: cover;
     background-size: cover;
     box-shadow: rgba(13, 17, 17,0.7) 0vmax 1vmax 1vmax -1vmax;
+    cursor: pointer;
 }

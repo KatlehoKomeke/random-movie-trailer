@@ -26,7 +26,6 @@
             overflow: hidden;
             display: grid;
             place-items: center;
-            cursor: pointer;
             h1{
                 background: rgba(25,25,25,0.3);
                 text-align: center;
@@ -34,6 +33,7 @@
                 border-radius: 4vmax;
                 width: min-content;
                 white-space: nowrap;
+                cursor: pointer;
             }
         }
     }

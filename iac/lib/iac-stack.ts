@@ -10,13 +10,20 @@ import { graphqlQueryType, standardCognitoAttributes } from '../types/types'
 // one.
 dotenv.config({path:'./.env'})
 
-export class IacStack extends cdk.Stack {
+export class randomMovieTrailerStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, {
       env: {
         region: process.env.aws_region!
       },
       ...props
+    })
+    // The code that defines your stack goes here
+
+    // hosted zone 
+    const zone = cdk.aws_route53.HostedZone.fromHostedZoneAttributes(this, process.env.hosted_zone!, {
+      hostedZoneId: process.env.hosted_zone_Id!,
+      zoneName: process.env.hosted_zone!
     })
 
     // // // Prints out the AppSync GraphQL endpoint to the terminal
@@ -104,6 +111,17 @@ export class IacStack extends cdk.Stack {
       writeAttributes: clientWriteAttributes
     })
 
+    const api_certificate = new cdk.aws_certificatemanager.Certificate(this, process.env.api_certificate!, { 
+      domainName: process.env.api_domain_name!,
+      validation:  {
+        props:{
+          method: cdk.aws_certificatemanager.ValidationMethod.DNS,
+          hostedZone: zone
+        },
+        method: cdk.aws_certificatemanager.ValidationMethod.DNS
+      }
+    })
+
     // Creates a graphql API using AppSync
     const api_graphql = new cdk.aws_appsync.GraphqlApi(this, process.env.api_graphql!, {
       name: process.env.api_graphql!,
@@ -133,8 +151,19 @@ export class IacStack extends cdk.Stack {
           }
         ]
       },
-      xrayEnabled: true
+      xrayEnabled: true,
+      domainName: {
+        domainName: process.env.api_domain_name!,
+        certificate: api_certificate
+      }
     })
+
+    // create a cname to the appsync domain. will map to something like xxxx.cloudfront.net
+    new cdk.aws_route53.CnameRecord(this, `api_graphqlCnameRecord`, {
+      recordName: 'api.random-movie-trailer.com',
+      zone,
+      domainName: api_graphql.appSyncDomainName,
+    }) 
 
     const mainLambda = new cdk.aws_lambda.Function(this, process.env.main_lambda_handler!, {
       runtime: cdk.aws_lambda.Runtime.NODEJS_LATEST,
@@ -211,11 +240,37 @@ export class IacStack extends cdk.Stack {
       destinationBucket: cloudfrontBucket,
       contentLanguage: "en"
     })
+
+    const frontEnd_certificate = new cdk.aws_certificatemanager.Certificate(this, process.env.certificate!, { 
+      domainName: process.env.frontend_domain_name!,
+      subjectAlternativeNames: [process.env.frontend_domain_name_www!],
+      validation:  {
+        props:{
+          method: cdk.aws_certificatemanager.ValidationMethod.DNS,
+          hostedZone: zone
+        },
+        method: cdk.aws_certificatemanager.ValidationMethod.DNS
+      }
+    })
     
-    new cdk.aws_cloudfront.Distribution(this, process.env.cloudfront_distribution!, {
+    const cloudfrontDistribution = new cdk.aws_cloudfront.Distribution(this, process.env.cloudfront_distribution!, {
       defaultBehavior: { 
         origin: new cdk.aws_cloudfront_origins.S3Origin(cloudfrontBucket)
-      }
+      },
+      domainNames: [process.env.frontend_domain_name!,process.env.frontend_domain_name_www!],
+      certificate: frontEnd_certificate
+    })
+
+    new cdk.aws_route53.ARecord(this,process.env.frontend_domain_name_record!,{
+      target: cdk.aws_route53.RecordTarget.fromAlias(new cdk.aws_route53_targets.CloudFrontTarget(cloudfrontDistribution)),
+      zone: zone,
+      recordName: process.env.frontend_domain_name!
+    })
+
+    new cdk.aws_route53.ARecord(this,process.env.frontend_domain_name_www_record!,{
+      target: cdk.aws_route53.RecordTarget.fromAlias(new cdk.aws_route53_targets.CloudFrontTarget(cloudfrontDistribution)),
+      zone: zone,
+      recordName: 'www'
     })
   }
 }

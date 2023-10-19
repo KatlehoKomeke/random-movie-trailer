@@ -43,7 +43,7 @@ function LandingPage() {
   async function fetchMoreData(){
     await getContent(getRandomInt(totalPages))
     .then((contents:any) => {
-      setContents({page:contents.page,results:contents.results,total_pages:contents.total_pages,total_results:contents.total_results})
+      setContents({page:contents?.page,results:contents?.results,total_pages:contents?.total_pages,total_results:contents?.total_results})
     })
     .then(() => {
       setLoading(false)
@@ -68,13 +68,14 @@ function LandingPage() {
           {
             contents.results.map(
               function(data){
-                return(<ContentDisplay image={data.backdrop_path} title={data.title} id={data.id}/>)
+                return(<ContentDisplay image={data?.backdrop_path} title={data?.title} id={data?.id}/>)
               }
             )
           }
         </div>
     )
   }
+  
   return (
     showLoader(loading,tailspin(),renderLandingPage())
   )

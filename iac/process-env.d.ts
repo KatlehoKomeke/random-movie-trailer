@@ -36,6 +36,12 @@ declare global {
 
             s3_deployment: string;
             cloudfront_distribution: string;
+
+            certificate: string;
+            hosted_zone_Id: string;
+            hosted_zone: string;
+            frontend_domain_name: string;
+            frontend_domain_name_www: string;
         }
     }
 }

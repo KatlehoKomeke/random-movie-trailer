@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { IacStack } from '../lib/iac-stack';
+import { randomMovieTrailerStack } from '../lib/iac-stack';
 
 const app = new cdk.App();
-new IacStack(app, 'IacStack', {
+new randomMovieTrailerStack(app, 'randomMovieTrailerStack', {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */

@@ -42,7 +42,6 @@ input:focus::placeholder{
             }
             .switch{
                 cursor: pointer;
-                user-select: none;
                 padding: 1vmax;
                 border-radius: 5vmax;
             }
@@ -83,9 +82,40 @@ input:focus::placeholder{
     cursor: pointer;
     user-select: none;
     max-width: 25vmax;
+    text-align: center;
 }
 
-.VerifyCode-container{
+.forgot-password{
+    padding: 1vmax;
+    font-weight: bold;
+    border-radius: 2vmax;
+    text-align: center;
+}
+
+.forgot-password:hover{
+    text-decoration-thickness: 0.25vmax;
+    background: rgba(25,25,25,0.1);
+}
+
+.switchSignInMode-container{
+    display: grid;
+    justify-content: space-evenly;
+    grid-template-columns: auto auto;
+    gap: 1vmax;
+    p{
+        padding: 1vmax;
+    }
+    .switchSignInMode{
+        font-weight: bold;
+        border-radius: 2vmax;
+    }
+    .switchSignInMode:hover{
+        text-decoration-thickness: 0.25vmax;
+        background: rgba(25,25,25,0.1);
+    }
+}
+
+.VerifyCode-container, .ResetPassword-container{
     display: grid;
     place-items: center;
     height: 100vh;
@@ -118,9 +148,8 @@ input:focus::placeholder{
                 display: grid;
                 place-items: center;
                 font-size: 2vmax;
-                width: 5vmax;
+                width: 4vmax;
                 padding-left: 4vmax;
-                padding-right: 4vmax;
             }
         }
     }

@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "random-movie-trailer",
+  "name": "random-movie-trailer",
   "icons": [
     {
       "src": "favicon.ico",
