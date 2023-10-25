@@ -1,14 +1,16 @@
-# Welcome to your CDK TypeScript project
+# :warning: Warning
 
-This is a blank project for CDK development with TypeScript.
+The project is not supplied with .env files   
+so if you wish to run this yourself, you will  
+need to create some yourselves
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+# Here is a simple cloudformation design:
 
-## Useful commands
+![overview of architecture](./assets/new-designer.png)
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+# Tech Stack
+
+node version: 20.7.0  
+npm version: 10.1.0  
+
+for more inform read the pacakge.json file
