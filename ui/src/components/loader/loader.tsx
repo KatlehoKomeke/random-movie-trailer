@@ -1,8 +1,10 @@
 import { TailSpin } from  'react-loader-spinner'
+import { TailSpinProps } from '../../declarations/types'
+import { initTailSpin } from '../../declarations/consts'
 
-export function tailspin(){
+export function tailspin(props:TailSpinProps = initTailSpin){
     return(
-        <TailSpin height="80" width="80" color="#212020" ariaLabel="tail-spin-loading" radius="1" wrapperStyle={{}} wrapperClass="loader" visible={true}/>
+        <TailSpin height={props.height} width={props.width} color={props.color} ariaLabel={props.ariaLabel} radius={props.radius} wrapperStyle={props.wrapperStyle} wrapperClass={props.wrapperClass} visible={props.visible}/>
     )
 }
 

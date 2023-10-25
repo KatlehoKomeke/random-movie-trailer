@@ -1,18 +1,16 @@
 import AWS from 'aws-sdk'
+import { WatchlistMutationResponse } from '../declarations/types'
+import { logException } from '../utils/exceptions'
 const docClient = new AWS.DynamoDB.DocumentClient()
 
-async function deleteWatchlist(email: string):Promise<{isSuccessful: boolean}> {
+async function deleteWatchlist(email: string):Promise<WatchlistMutationResponse> {
     await docClient.delete({
         TableName: process.env.user_behaviour_table!,
-        Key: {
-            'email':  email
-        }
+        Key: { 'email' : email }
     })
     .promise()
-    .catch((error)=>{
-        console.error('@deleteWatchlist -> DynamoDB error name: ', error?.name)
-        console.error('@deleteWatchlist -> DynamoDB error message: ', error?.message)
-        throw new Error('could not delete watchlist')
+    .catch((error:Error)=>{
+        logException(deleteWatchlist.name,error)
     })
     return {isSuccessful: true}
 }

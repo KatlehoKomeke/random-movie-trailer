@@ -6,6 +6,7 @@ import updateWatchlist from './lambdas/updateWatchlist'
 import getWatchlist from './lambdas/getWatchlist'
 import deleteWatchlist from './lambdas/deleteWatchlist'
 import handleMaliciousPayload from './utils/handleMaliciousPayload'
+import { logException } from './utils/exceptions'
 
 // The project is not suppplied with 
 // a .env as that is bad practice. 
@@ -15,6 +16,7 @@ import handleMaliciousPayload from './utils/handleMaliciousPayload'
 dotenv.config()
 
 export const handler = async (appSyncEvent:any) => {
+    // Cloudwatch logging
     console.log("appSyncEvent: ",appSyncEvent)
     
     handleMaliciousPayload(appSyncEvent)
@@ -31,6 +33,6 @@ export const handler = async (appSyncEvent:any) => {
         case "deleteWatchlist":
             return await deleteWatchlist(appSyncEvent.arguments.email)
         default:
-            throw new Error('invalid request')
+            logException(handler.name)
     }
 }

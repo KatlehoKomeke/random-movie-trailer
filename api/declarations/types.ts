@@ -1,15 +1,16 @@
-// enums
+import { site } from "./consts"
 
-export enum video_type {
-    YouTube = "YouTube",
-    Vimeo = "Vimeo"
+export type Content = {
+    title:string,
+    link:string
 }
 
-export enum video_embed_link {
-    YouTube = "https://www.youtube.com/embed/"
+export type userBehaviour = {
+    email: string,
+    createdAt: string,
+    lastUpdate: string,
+    watchlist: number[]
 }
-
-// types 
 
 export type result = {
     adult: boolean,
@@ -35,7 +36,12 @@ export type Contents = {
     total_pages: number
 } 
 
-export type userBehaviour = {
-    email: string,
-
+export type GetWatchlistResponse = {
+    watchlist:number[]
 }
+
+export type WatchlistMutationResponse = {
+    isSuccessful: boolean
+}
+
+export type siteType = (typeof site)[keyof typeof site]

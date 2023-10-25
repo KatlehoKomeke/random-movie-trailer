@@ -8,10 +8,7 @@ import { redirectToErrorPage } from '../../utils/error'
 function SignIn() {
   const [verificationHeader,setVerificationHeader] = useState("Please enter the verification code sent to your email. If you haven't received one, please wait 5 minutes before requesting another.")
   const [swapSignInMode,setSwapSignInMode] = useState(false)
-  const [userFormFields, setUserFormFields] = useState({
-    email: "",
-    password: "",
-  })
+  const [userFormFields, setUserFormFields] = useState({email: "",password: ""})
   const [isVerifyStep, setIsVerifyStep] = useState(false)
   const [isResetPasswordStep, setIsResetPasswordStep] = useState(false)
   const [verifyCode, setVerifyCode] = useState("")
@@ -59,7 +56,7 @@ function SignIn() {
   async function resendVerificationCode() {
     setLoading(true)
     await Auth.resendSignUp(userFormFields.email)
-    .then(async (result)=>{
+    .then(async ()=>{
       setLoading(false)
       setVerificationHeader('Another verification code has been sent. Please check your email.')
     })
@@ -95,12 +92,12 @@ function SignIn() {
       setVerificationHeader('Another verification code has been sent. Please check your email.')
     }
     setIsResetPasswordStep(true)
+
     await Auth.forgotPassword(userFormFields.email)
     .then((data) => {     
       if(data){
         setLoading(false)
       }
-      console.log("await Auth.forgotPassword(userFormFields.email)",data)
     })
     .catch((error) =>{
       if(error.message !== 'Cannot reset password for the user as there is no registered/verified email or phone_number'){
@@ -118,14 +115,12 @@ function SignIn() {
     setLoading(true)
     await Auth.forgotPasswordSubmit(userFormFields.email, verifyCode, userFormFields.password)
     .then((response) => {
-      // eslint-disable-next-line no-restricted-globals
       response === 'SUCCESS' ? setSwapSignInMode(true) : redirectToErrorPage('Password resest was unsuccessful')
       setIsVerifyStep(false)
       setLoading(false)
     })
     .catch((error) => redirectToErrorPage(error?.message))
   }
-
 
   function renderSignInBtn(){
     if(swapSignInMode){
@@ -212,5 +207,5 @@ function SignIn() {
   )
 }
 
-export default SignIn;
+export default SignIn
 

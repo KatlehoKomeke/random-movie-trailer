@@ -1,22 +1,27 @@
+import { watchlist } from '../declarations/consts'
+import { WatchlistMutationResponse } from '../declarations/types'
+import { logException } from '../utils/exceptions'
 import { addUserBehaviour, updateUserWatchlist, userBehaviourExists } from '../utils/watchlist'
 
-async function updateWatchlist(movieId:number,email:string):Promise<{isSuccessful:boolean}>{
+async function updateWatchlist(movieId:number,email:string):Promise<WatchlistMutationResponse>{
     let isSuccesFulUpdate = false
+
     await userBehaviourExists(email)
     .then(async (userBehaviourExists)=>{
-        if(userBehaviourExists?.watchlist.length >= 0) {
-            await updateUserWatchlist(movieId,email,userBehaviourExists?.watchlist)
-        }else{
-            await addUserBehaviour(movieId,email)
-            console.log('added user behavior')
-        }
+
+        // If the table has an item matching 
+        // the given email update the watchlist
+        // or else add an item
+        userBehaviourExists && userBehaviourExists?.watchlist?.length >= watchlist.minimumSize
+        ?await updateUserWatchlist(movieId,email,userBehaviourExists?.watchlist)
+        :await addUserBehaviour(movieId,email)
+        
         isSuccesFulUpdate = true
     })
-    .catch((error)=>{
-        console.error('@updateWatchlist -> DynamoDB error name: ', error?.name)
-        console.error('@updateWatchlist -> DynamoDB error message: ', error?.message)
-        throw new Error("could not update watchlist")
+    .catch((error:Error)=>{
+        logException(updateWatchlist.name,error)
     })
+    
     return {isSuccessful: isSuccesFulUpdate}
 }
 

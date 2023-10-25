@@ -1,9 +1,9 @@
 import { Auth } from "aws-amplify"
 import { redirectToErrorPage } from "./error"
-import { HTTP_METHOD, headers } from "../types/types"
+import { HTTP_METHOD, headers } from "../declarations/consts"
 import { jwt } from "./auth"
 
-export async function getWatchlist(movieId:number): Promise<number[]> {
+export async function getWatchlist():Promise<number[]> {
     const email = (await Auth.currentUserInfo())?.attributes.email
     const response = await fetch(process.env.REACT_APP_appsync_url!,{
         method: HTTP_METHOD.POST,
@@ -47,7 +47,7 @@ export async function updateWatchlist(movieId:number):Promise<boolean> {
     return responseAsJson?.data.updateWatchlist.isSuccessful
 }
 
-export async function deleteWatchlist():Promise<boolean | void> {
+export async function deleteWatchlist():Promise<boolean|void> {
     const email = (await Auth.currentUserInfo())?.attributes.email
     const response = await fetch(process.env.REACT_APP_appsync_url!,{
         method: HTTP_METHOD.POST,

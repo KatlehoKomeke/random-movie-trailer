@@ -7,7 +7,7 @@ import LandingPage from './pages/landing-page/landing-page'
 import SignIn from './pages/sign-in/sign-in'
 import { Amplify, Auth } from 'aws-amplify'
 import Content from './pages/content/content'
-import { URL_Redirect } from './types/types'
+import { URL_Redirect } from './declarations/consts'
 import Menu from './pages/menu/menu'
 import { forceHttps } from './utils/security'
 import Error from './pages/error/error'
@@ -40,7 +40,7 @@ root.render(
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
-);
+)
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

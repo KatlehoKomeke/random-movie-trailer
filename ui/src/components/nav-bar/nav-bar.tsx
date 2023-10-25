@@ -4,7 +4,8 @@ import logo from './../../assets/Logo.svg'
 import backBtn from './../../assets/back_btn.svg'
 import menuBtn from './../../assets/menu_btn.svg'
 import { Link } from 'react-router-dom';
-import { NavBarOptions } from './../../types/types'
+import { NavBarOptions } from '../../declarations/types'
+import { URL_Redirect } from '../../declarations/consts'
 
 function NavBar(props: NavBarOptions) {
   return (
@@ -12,7 +13,7 @@ function NavBar(props: NavBarOptions) {
       { 
         props.showLogo
         ?
-          <Link reloadDocument={true} to="/">
+          <Link reloadDocument={true} to={URL_Redirect.Home}>
             <img src={logo} className='logo' alt='logo'></img>
           </Link>
         : null
@@ -20,17 +21,15 @@ function NavBar(props: NavBarOptions) {
       { 
         props.showSignIn
         ?
-          <Link to="/sign-in" className='Link'>
-            <div className='sign-in_btn'>
-              sign-in
-            </div>
+          <Link to={URL_Redirect.SignIn} className='Link'>
+            <div className='sign-in_btn'>sign-in</div>
           </Link>
         : null
       }
       { 
         props.showBackBtn
         ?
-          <Link to="/">
+          <Link to={URL_Redirect.Home}>
             <img src={backBtn} className='backBtn' alt='back button'></img>
           </Link>
         : null
@@ -38,13 +37,13 @@ function NavBar(props: NavBarOptions) {
       { 
         props.showMenuBtn
         ?
-          <Link to="/menu">
+          <Link to={URL_Redirect.Menu}>
             <img src={menuBtn} className='menuBtn' alt='menu button'></img>
           </Link>
         : null
       }
     </div>
-  );
+  )
 }
 
-export default NavBar;
+export default NavBar

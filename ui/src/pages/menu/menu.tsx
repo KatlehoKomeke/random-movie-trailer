@@ -9,6 +9,7 @@ import { deleteWatchlist } from '../../utils/watchlist'
 
 function Menu() {
     const [loading, setLoading] = useState(true)
+    
     useEffect(() => {
         redirectIfNotLoggedIn().then(() => setLoading(false))
     },[])
@@ -40,8 +41,9 @@ function Menu() {
         setLoading(true)
         await deleteWatchlist()
         .then(() => deleteUser())
-        .catch(() => deleteUser())
+        .catch((error:Error) => redirectToErrorPage(error.message))
     }
+    
     function renderMenu(){
         return(
             <div className='menu-container'>
@@ -61,4 +63,4 @@ function Menu() {
     )
 }
 
-export default Menu;
+export default Menu

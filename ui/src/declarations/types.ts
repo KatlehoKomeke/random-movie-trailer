@@ -1,4 +1,4 @@
-import { jwt } from "../utils/auth"
+import { BaseProps } from "react-loader-spinner/dist/type";
 
 export type contentType = {
     title: string;
@@ -19,20 +19,7 @@ export type ContentProps = {
     id: number;
 }
 
-export enum URL_Redirect {
-    Home = '/',
-    Content = '/content',
-    SignIn = '/sign-in',
-    Menu = '/menu',
-    Error = '/error',
-    Invalid = '*'
-}
-
-export enum QueryParams {
-    id = '?id='
-}
-
-type result = {
+export type result = {
     adult?: boolean,
     backdrop_path: string,
     genre_ids?: number[],
@@ -56,30 +43,13 @@ export type contentsType = {
     total_results: number
 }
 
-export const initResults = {
-    adult: false,
-    backdrop_path: "",
-    genre_ids: [0],
-    id: 0,
-    original_language: "",
-    original_title: "",
-    overview: "",
-    popularity: 0,
-    poster_path: "",
-    release_date: "",
-    title: "",
-    video: false,
-    vote_average:0,
-    vote_count: 0
-}
+export type TailSpinProps = {
+    radius?: string | number;
+    strokeWidth?: string | number;
+} & BaseProps 
 
-export const headers = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Authorization': ""
-}
-
-export enum HTTP_METHOD {
-    POST = 'POST',
-    GET = 'GET'
+export type handleErrorsProp = {
+    errorMessage:string|null,
+    setErrorMessage:(value: React.SetStateAction<string>) => void,
+    setCustomRedirect:(value: React.SetStateAction<string>) => void
 }

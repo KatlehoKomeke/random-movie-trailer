@@ -1,6 +1,8 @@
 import axios from 'axios'
 import * as dotenv from 'dotenv'
-import { Contents } from '../types/types'
+import { Contents } from '../declarations/types'
+import { axiosConfig, initContent } from '../declarations/consts'
+import { logException } from '../utils/exceptions'
 
 // The project is not suppplied with 
 // a .env as that is bad practice. 
@@ -12,46 +14,18 @@ dotenv.config()
 axios.defaults.headers.common['accept'] = 'application/json'
 axios.defaults.headers.common['Authorization'] ='Bearer '+process.env.tmdb_api_key!
 
-async function getContent(page: number): Promise<Contents>
-{
-    let data = {
-                page: 0,
-                results: [ {
-                    adult: false,
-                    backdrop_path: "",
-                    genre_ids: [0],
-                    id: 0,
-                    original_language: "",
-                    original_title: "",
-                    overview: "",
-                    popularity: 0,
-                    poster_path: "",
-                    release_date: "",
-                    title: "",
-                    video: true,
-                    vote_average: 0,
-                    vote_count: 0
-                }],
-                total_pages: 0,
-                total_results: 0
-              }
+async function getContent(page: number): Promise<Contents>{
+    let data = initContent
     
-    // GET request contents
     await axios({
-        method: 'get',
-        url: 'https://api.themoviedb.org/3/discover/movie?page='+page+'&sort_by=popularity.desc',
-        responseType: 'json'
+        ...axiosConfig,
+        url: process.env.tmbd_get_content_url!+page+process.env.tmbd_get_content_query_params!
     })
     .then((response)=> {
-        if(response.data){
-            data = response.data
-        }else{
-            throw new Error('response is empty :(')
-        }
+        data = response.data
     })
-    .catch((error)=>{
-        console.error("error @getContent: ",error.message)
-        throw new Error("could not get content")
+    .catch((error:Error)=>{
+        logException(getContent.name,error)
     })
 
     return {

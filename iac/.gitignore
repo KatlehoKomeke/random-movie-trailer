@@ -1,6 +1,7 @@
 *.js
+!jest.config.js
+
 /bin/*.d.ts
 /lib/*.d.ts
-/test/*.d.ts
-/types/*.d.ts
+/declarations/*.d.ts
 /triggers/*.d.ts

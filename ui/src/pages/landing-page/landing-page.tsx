@@ -4,14 +4,15 @@ import NavBar from '../../components/nav-bar/nav-bar'
 import ContentDisplay from '../../components/content-display/content-display'
 import { showLoader, tailspin } from '../../components/loader/loader'
 import { getContent } from '../../utils/content'
-import { initResults } from '../../types/types'
+import { initContents } from '../../declarations/consts'
 import { redirectIfNotLoggedIn } from '../../utils/auth'
 import { redirectToErrorPage } from '../../utils/error'
+import { contentsType } from '../../declarations/types'
 
 function LandingPage() {
   
   const [loading, setLoading] = useState(true)
-  const [contents,setContents] = useState({page:0,results:[initResults],total_pages:0,total_results:0})
+  const [contents,setContents] = useState(initContents)
  
   // Restricted to 500 by third party API
   const totalPages = 500
@@ -25,24 +26,14 @@ function LandingPage() {
       })
   },[])
 
-  function renderLandingPage(){
-    return(
-      <div className="landing-page-container">
-        <NavBar showLogo={true} showMenuBtn={true}/>
-          {
-            renderInfiniteScroll()
-          }
-      </div>
-    )
-  }
-
   function getRandomInt(max:number) {
     return Math.floor(Math.random() * max);
   }
 
   async function fetchMoreData(){
+    debugger
     await getContent(getRandomInt(totalPages))
-    .then((contents:any) => {
+    .then((contents:contentsType) => {
       setContents({page:contents?.page,results:contents?.results,total_pages:contents?.total_pages,total_results:contents?.total_results})
     })
     .then(() => {
@@ -66,7 +57,7 @@ function LandingPage() {
     return(
         <div className='content-display-container-box' onScroll={handleScroll}>
           {
-            contents.results.map(
+            contents?.results.map(
               function(data){
                 return(<ContentDisplay image={data?.backdrop_path} title={data?.title} id={data?.id}/>)
               }
@@ -75,10 +66,19 @@ function LandingPage() {
         </div>
     )
   }
+
+  function renderLandingPage(){
+    return(
+      <div className="landing-page-container">
+        <NavBar showLogo={true} showMenuBtn={true}/>
+        {renderInfiniteScroll()}
+      </div>
+    )
+  }
   
   return (
     showLoader(loading,tailspin(),renderLandingPage())
   )
 }
 
-export default LandingPage;
+export default LandingPage

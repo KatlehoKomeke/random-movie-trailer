@@ -1,6 +1,8 @@
 import axios from 'axios'
 import * as dotenv from 'dotenv'
-import { video_embed_link, video_type } from '../types/types'
+import { axiosConfig, site, video_embed_link } from '../declarations/consts'
+import { siteType } from '../declarations/types'
+import { logException } from '../utils/exceptions'
 
 // The project is not suppplied with 
 // a .env as that is bad practice. 
@@ -12,44 +14,39 @@ dotenv.config()
 axios.defaults.headers.common['accept'] = 'application/json'
 axios.defaults.headers.common['Authorization'] ='Bearer '+process.env.tmdb_api_key!
 
-async function getTitle(movieId:number):Promise<string>{
+async function getTitle(movieId:number):Promise<string> {
     let title = ''
-    // GET request for title
+
     await axios({
-        method: 'get',
-        url: 'https://api.themoviedb.org/3/movie/'+movieId+'?language=en-US',
-        responseType: 'json'
+        ...axiosConfig,
+        url: process.env.tmbd_get_content_by_id_url!+movieId+process.env.tmbd_get_content_by_id_query_params!
     })
     .then((response)=>title = response.data.title)
     .catch((error)=>{
-        console.error("error @title getter: "+error.message)
-        throw new Error("could not find trailer")
+        logException(getTitle.name,error)
     })
 
     return title
 }
 
-async function getLink(movieId:number):Promise<string>{
+async function getLink(movieId:number):Promise<string> {
     let link = ''
-    // GET request for video link
+
     await axios({
-        method: 'get',
-        url: process.env.tmbd_get_content_by_id_url!+movieId+process.env.tmbd_get_content_by_id_query_params!,
-        responseType: 'json'
+        ...axiosConfig,
+        url: process.env.tmbd_get_content_by_id_url!+movieId+process.env.tmbd_get_content_by_id_video_params!
     })
     .then(function (response) {
-        link = response.data.results.find((element)=> element.site === video_type.YouTube)?.key
+        link = response.data.results.find((element:{site:siteType}) => element.site === site.YouTube)?.key
     })
     .catch((error)=>{
-        console.error("error @link getter: "+error.message)
-        throw new Error("could not find trailer")
+        logException(getLink.name,error)
     })
 
     return link
 }
 
-async function getContentById(movieId: number): Promise<{title:string,link:string;}>{
-
+async function getContentById(movieId: number): Promise<{title:string,link:string;}> {
     const title = await getTitle(movieId)
     const link = await getLink(movieId)
 

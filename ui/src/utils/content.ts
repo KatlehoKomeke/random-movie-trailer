@@ -1,8 +1,9 @@
-import { HTTP_METHOD, contentType, contentsType, headers } from "../types/types"
+import { HTTP_METHOD, headers } from "../declarations/consts"
+import { contentType, contentsType } from "../declarations/types"
 import { jwt } from "./auth"
 import { redirectToErrorPage } from "./error"
 
-export async function getContent(page: number):Promise<contentsType>{
+export async function getContent(page: number):Promise<contentsType> {
     const response = await fetch(process.env.REACT_APP_appsync_url!,{
         method: HTTP_METHOD.POST,
         body: JSON.stringify({
@@ -26,16 +27,16 @@ export async function getContent(page: number):Promise<contentsType>{
     if(responseAsJson?.errors){
         redirectToErrorPage(responseAsJson?.errors[0].errorType)
     }
-
+    
     return responseAsJson?.data?.getContent as contentsType
 }
 
-export async function getContentById(id: string):Promise<contentType>{
+export async function getContentById(movieId: number):Promise<contentType> {
     const response = await fetch(process.env.REACT_APP_appsync_url!,{
         method: HTTP_METHOD.POST,
         body: JSON.stringify({
             query:`query getContentByIdQuery{
-                            getContentById(movieId:`+parseInt(id)+`){
+                            getContentById(movieId:`+movieId+`){
                                 link
                                 title
                             }
@@ -54,5 +55,5 @@ export async function getContentById(id: string):Promise<contentType>{
         redirectToErrorPage('could not get trailer')
     }
 
-    return {title:responseAsJson.data?.getContentById?.title,link:responseAsJson.data?.getContentById?.link}
+    return responseAsJson.data?.getContentById as contentType
 }

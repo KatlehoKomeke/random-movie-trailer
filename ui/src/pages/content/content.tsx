@@ -10,25 +10,27 @@ import { getWatchlist, updateWatchlist } from '../../utils/watchlist'
 
 function Content() {
     const [searchParams] = useSearchParams()
-    const [content,setContent] = useState({title: "",link:""})
+    const [content,setContent] = useState({title: '',link:''})
     const [loading, setLoading] = useState(true)
     const [contentWasWatched, setContentWasWatched] = useState(false)
 
-    async function loadContent(){
-        await getWatchlist(parseInt(searchParams.get('id')!))
+    function getId():number{
+        return parseInt(searchParams.get('id')!)
+    }
+
+    async function loadContent():Promise<void|never> {
+        await getWatchlist()
         .then(async (watchlist)=>{
-            const matchfound = watchlist.find((id)=> id === parseInt(searchParams.get('id')!)) 
-            if(matchfound !== undefined && matchfound !== null){
-                setContentWasWatched(true)
-            }else{
-                await updateWatchlist(parseInt(searchParams.get('id')!))
-            }
+            const matchfound = watchlist.some((id)=> id === getId()) 
+            matchfound ? setContentWasWatched(true) : await updateWatchlist(getId())
         })
-        await getContentById(searchParams.get('id')!)
+        .catch((error:Error)=>redirectToErrorPage(error.message))
+
+        await getContentById(getId())
         .then((content) =>{
             setContent(content)
         })
-        .catch((error)=>redirectToErrorPage(error))
+        .catch((error:Error)=>redirectToErrorPage(error.message))
     }
 
     useEffect(() => {
@@ -60,5 +62,5 @@ function Content() {
     )
 }
 
-export default Content;
+export default Content
 

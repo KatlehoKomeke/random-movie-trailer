@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import * as dotenv from 'dotenv'
-import { graphqlQueryType, standardCognitoAttributes } from '../types/types'
+import { graphqlQueryType, standardCognitoAttributes } from '../declarations/consts'
 
 // The project is not suppplied with 
 // a .env as that is bad practice. 
@@ -18,27 +18,10 @@ export class randomMovieTrailerStack extends cdk.Stack {
       },
       ...props
     })
-    // The code that defines your stack goes here
 
-    // hosted zone 
     const zone = cdk.aws_route53.HostedZone.fromHostedZoneAttributes(this, process.env.hosted_zone!, {
       hostedZoneId: process.env.hosted_zone_Id!,
       zoneName: process.env.hosted_zone!
-    })
-
-    // // // Prints out the AppSync GraphQL endpoint to the terminal
-    // new cdk.CfnOutput(this, "GraphQLAPIURL", {
-    //   value: api_graphql.graphqlUrl
-    // })
-
-    // Prints out the stack region to the terminal
-    new cdk.CfnOutput(this, "Stack Region", {
-      value: this.region
-    })
-
-    // Prints out the stack working directory
-    new cdk.CfnOutput(this, "__dirname", {
-      value: __dirname
     })
 
     const userPool = new cdk.aws_cognito.UserPool(this, process.env.user_pool!, {
@@ -122,7 +105,6 @@ export class randomMovieTrailerStack extends cdk.Stack {
       }
     })
 
-    // Creates a graphql API using AppSync
     const api_graphql = new cdk.aws_appsync.GraphqlApi(this, process.env.api_graphql!, {
       name: process.env.api_graphql!,
       // The schema prop is deprecated and will be removed
@@ -158,9 +140,8 @@ export class randomMovieTrailerStack extends cdk.Stack {
       }
     })
 
-    // create a cname to the appsync domain. will map to something like xxxx.cloudfront.net
-    new cdk.aws_route53.CnameRecord(this, `api_graphqlCnameRecord`, {
-      recordName: 'api.random-movie-trailer.com',
+    new cdk.aws_route53.CnameRecord(this, process.env.api_graphql_Cname!, {
+      recordName: process.env.api_domain_name!,
       zone,
       domainName: api_graphql.appSyncDomainName,
     }) 
@@ -172,7 +153,6 @@ export class randomMovieTrailerStack extends cdk.Stack {
       memorySize: parseInt(process.env.lambda_size!)
     })
     
-    // Set the new Lambda function as a data source for the AppSync API
     const mainLambdaDS = api_graphql.addLambdaDataSource(process.env.main_lambdaDS!, mainLambda);
 
     mainLambdaDS.createResolver(process.env.get_content_by_id_resolver!,{
@@ -209,10 +189,8 @@ export class randomMovieTrailerStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN
     })
 
-    // Giving the main lambda function full access to the userBehaviourTable
     userBehaviourTable.grantFullAccess(mainLambda)
 
-    // Passing the name of the user table
     mainLambda.addEnvironment(process.env.user_behaviour_table!, userBehaviourTable.tableName)
 
     const cloudfrontBucket = new cdk.aws_s3.Bucket(this, process.env.s3_bucket!, {
